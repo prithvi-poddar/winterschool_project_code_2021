@@ -37,6 +37,7 @@ def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
 
         # get the files in the train folder
         train_files = glob.glob(os.path.join(folder, "train/*"))
+        print(len(train_files))
         for f in train_files:
             # TODO: Fill this part
             cad_mesh = trimesh.load(f)  # <- Set path to a .off file
