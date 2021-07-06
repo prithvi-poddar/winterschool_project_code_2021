@@ -4,7 +4,7 @@ import trimesh
 import trimesh.sample
 import numpy as np
 import matplotlib.pyplot as plt
-import tensorflow as tf
+# import tensorflow as tf
 
 def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
     """
@@ -31,7 +31,7 @@ def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
 
     for class_id, folder in enumerate(folders):
         print("processing class: {}".format(os.path.basename(folder)))
-        print(folder)
+
         # TODO: Fill this part, get the name of the folder (class) and save it
         class_ids[class_id]=os.path.basename(folder)
 
@@ -84,4 +84,5 @@ def add_noise_and_shuffle(point_cloud, label):
     return point_cloud, label
 
 if __name__=='__main__':
-    create_point_cloud_dataset('ModelNet10/')
+    a = create_point_cloud_dataset('ModelNet10/')
+    print(a)
