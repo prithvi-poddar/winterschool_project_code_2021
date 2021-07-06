@@ -83,8 +83,8 @@ class CustomRegularizer(keras.regularizers.Regularizer):
         xxt = tf.reshape(xxt, (-1, self.dim, self.dim))
         # Compute (I-outerproduct)^2 element wise. use tf.square()
         # Apply weight
-        # ACompute reduce sum using tf.reduce_sum()
-        output = tf.reduce_sum(self.weight * tf.square(xxt - self.eye))
+        # Compute reduce sum using tf.reduce_sum()
+        output = tf.reduce_sum(self.weight*tf.square(tf.eye(self.dim)-xxt))
         return output
 
 def pointnet_classifier(inputs, num_classes):
@@ -159,5 +159,8 @@ def pointnet_segmenter(inputs, labels):
     x = conv_bn(x, 64)
     outputs = conv_bn(x,num_classes)
     # return the output
+<<<<<<< HEAD
     
+=======
+>>>>>>> 18488b1 (fixed a typo)
     return outputs
