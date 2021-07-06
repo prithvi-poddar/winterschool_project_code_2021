@@ -54,7 +54,8 @@ def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
     return (np.array(train_pc), np.array(test_pc),
             np.array(train_labels), np.array(test_labels), class_ids)
 
-def semantic_seg_dataset(train_pc, test_pc, train_labels, test_labels, class_ids,num_objects,num_test_data,num_train_data):
+def semantic_seg_dataset(data_dir, num_objects, num_test_data, num_train_data, num_points_per_cloud=1024):
+    train_pc, test_pc, train_labels, test_labels, class_ids = create_point_cloud_dataset(data_dir, num_points_per_cloud)
     train_pc_seg = []
     test_pc_seg = []
     train_labels_seg = np.zeros((len(class_ids),len(class_ids)))
