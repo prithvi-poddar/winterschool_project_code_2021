@@ -4,7 +4,7 @@ import trimesh
 import trimesh.sample
 import numpy as np
 import matplotlib.pyplot as plt
-import tensorflow as tf
+# import tensorflow as tf
 
 def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
     """
@@ -31,25 +31,29 @@ def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
 
     for class_id, folder in enumerate(folders):
         print("processing class: {}".format(os.path.basename(folder)))
-        print(folder)
+
         # TODO: Fill this part, get the name of the folder (class) and save it
-        class_ids
+        class_ids[str(class_id)]= folder[11:]
 
-    #     # get the files in the train folder
-    #     train_files = glob.glob(os.path.join(folder, "train/*"))
-    #     for f in train_files:
-    #         # TODO: Fill this part
-    #         train_pc
-    #         train_labels
-    #     # get the files in the test folder
-    #     test_files = glob.glob(os.path.join(folder, "test/*"))
-    #     for f in test_files:
-    #         # TODO: FIll this part
-    #         test_pc
-    #         test_labels
+        # get the files in the train folder
+        train_files = glob.glob(os.path.join(folder, "train/*"))
+        for f in train_files:
+            # TODO: Fill this part
+            cad_mesh = trimesh.load(f)  # <- Set path to a .off file
+            points = trimesh.sample.sample_surface(cad_mesh, 1024)[0]
+            train_pc.append(points)
+            train_labels.append(folder[11:])
+        # get the files in the test folder
+        test_files = glob.glob(os.path.join(folder, "test/*"))
+        for f in test_files:
+            # TODO: FIll this part
+            cad_mesh = trimesh.load(f)  # <- Set path to a .off file
+            points = trimesh.sample.sample_surface(cad_mesh, 1024)[0]
+            test_pc.append(points)
+            test_labels.append(folder[11:])
 
-    # return (np.array(train_pc), np.array(test_pc),
-    #         np.array(train_labels), np.array(test_labels), class_ids)
+    return (np.array(train_pc), np.array(test_pc),
+            np.array(train_labels), np.array(test_labels), class_ids)
 
 
 def visualize_cloud(point_cloud):
@@ -82,4 +86,5 @@ def add_noise_and_shuffle(point_cloud, label):
     return point_cloud, label
 
 if __name__=='__main__':
-    create_point_cloud_dataset('ModelNet10/')
+    a = create_point_cloud_dataset('ModelNet10/')
+    print(a)
