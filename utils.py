@@ -40,7 +40,7 @@ def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
         for f in train_files:
             # TODO: Fill this part
             cad_mesh = trimesh.load(f)  # <- Set path to a .off file
-            points = trimesh.sample.sample_surface(cad_mesh, 1024)[0]
+            points = trimesh.sample.sample_surface(cad_mesh, num_points_per_cloud)[0]
             train_pc.append(points)
             train_labels.append(folder[11:])
         # get the files in the test folder
@@ -48,7 +48,7 @@ def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
         for f in test_files:
             # TODO: FIll this part
             cad_mesh = trimesh.load(f)  # <- Set path to a .off file
-            points = trimesh.sample.sample_surface(cad_mesh, 1024)[0]
+            points = trimesh.sample.sample_surface(cad_mesh, num_points_per_cloud)[0]
             test_pc.append(points)
             test_labels.append(folder[11:])
 
