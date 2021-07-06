@@ -10,6 +10,7 @@ import tensorflow as tf
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 
+
 def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
     """
     Given the path to the ModelNet10 dataset, samples the models and creates point clouds
@@ -22,13 +23,13 @@ def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
     :rtype: tuple
     """
 
-    train_pc = []   # array of training point clouds
-    test_pc = []    # array of test point clouds
+    train_pc = []  # array of training point clouds
+    test_pc = []  # array of test point clouds
 
-    train_labels = []   # array of corresponding training labels
-    test_labels = []    # array of corresponding test labels
+    train_labels = []  # array of corresponding training labels
+    test_labels = []  # array of corresponding test labels
 
-    class_ids = {}   # list of class names
+    class_ids = {}  # list of class names
 
     # get all the folders except the readme file
     folders = glob.glob(os.path.join(data_dir, "[!README]*"))
@@ -37,20 +38,20 @@ def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
         print("processing class: {}".format(os.path.basename(folder)))
 
         # TODO: Fill this part, get the name of the folder (class) and save it
-        class_ids[class_id]=os.path.basename(folder)
+        class_ids[class_id] = os.path.basename(folder)
 
         # get the files in the train folder
         train_files = glob.glob(os.path.join(folder, "train/*"))
         for f in train_files:
             # TODO: Fill this part
-            points = trimesh.sample.sample_surface(trimesh.load(f),num_points_per_cloud)[0]
+            points = trimesh.sample.sample_surface(trimesh.load(f), num_points_per_cloud)[0]
             train_pc.append(points)
             train_labels.append(class_id)
         # get the files in the test folder
         test_files = glob.glob(os.path.join(folder, "test/*"))
         for f in test_files:
             # TODO: FIll this part
-            points = trimesh.sample.sample_surface(trimesh.load(f),num_points_per_cloud)[0]
+            points = trimesh.sample.sample_surface(trimesh.load(f), num_points_per_cloud)[0]
             test_pc.append(points)
             test_labels.append(class_id)
 
@@ -71,64 +72,65 @@ def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
     return (np.array(train_pc), np.array(test_pc),
             np.array(encoded_train_labels), np.array(encoded_test_labels), class_ids)
 
+
 def semantic_seg_dataset(data_dir, num_objects, num_test_data, num_train_data, num_points_per_cloud=1024):
     train_pc, test_pc, train_labels, test_labels, class_ids = create_point_cloud_dataset(data_dir, num_points_per_cloud)
     train_pc_seg = []
     test_pc_seg = []
-    train_labels_seg = np.zeros((len(class_ids),len(class_ids)))
-    test_labels_seg = np.zeros((len(test_pc),len(class_ids)))
-    class_ids_seg = np.zeros((len(class_ids),len(class_ids)))
+    train_labels_seg = np.zeros((len(class_ids), len(class_ids)))
+    test_labels_seg = np.zeros((len(test_pc), len(class_ids)))
+    class_ids_seg = np.zeros((len(class_ids), len(class_ids)))
     temp_class_ids = {}
-    scene_label = np.zeros((len(class_ids)**num_objects,len(class_ids)))
+    scene_label = np.zeros((len(class_ids) ** num_objects, len(class_ids)))
     for i in range(len(class_ids)):
         temp_class_ids[class_ids[i]] = class_ids_seg[i]
 
     for c_id in range(len(class_ids)):
-        class_ids_seg[c_id,c_id] = 1
-    
-    for data in range(num_test_data): 
-        index = np.random.randint(0,len(test_pc),num_objects)   
+        class_ids_seg[c_id, c_id] = 1
+
+    for data in range(num_test_data):
+        index = np.random.randint(0, len(test_pc), num_objects)
         new = np.array([])
         for i in index:
-            axs = np.random.randint(0,6)
+            axs = np.random.randint(0, 6)
             origin = 0
             if axs == 0:
-                origin = max(test_pc[i,:,2])
+                origin = max(test_pc[i, :, 2])
             elif axs == 1:
-                origin = min(test_pc[i,:,2])
+                origin = min(test_pc[i, :, 2])
             elif axs == 2:
-                origin = max(test_pc[i,:,1])
+                origin = max(test_pc[i, :, 1])
             elif axs == 3:
-                origin = min(test_pc[i,:,1])
+                origin = min(test_pc[i, :, 1])
             elif axs == 4:
-                origin = max(test_pc[i,:,0])
+                origin = max(test_pc[i, :, 0])
             elif axs == 5:
-                origin = min(test_pc[i,:,0])
-            new[:,axs%3] +=  origin
-            new = np.concatenate((new,test_pc[i]),axis=0)
+                origin = min(test_pc[i, :, 0])
+            new[:, axs % 3] += origin
+            new = np.concatenate((new, test_pc[i]), axis=0)
             test_labels_seg[data] += temp_class_ids[test_labels[i]]
         test_pc_seg.append(new)
 
-    for data in range(num_train_data): 
-        index = np.random.randint(0,len(train_pc),num_objects)   
+    for data in range(num_train_data):
+        index = np.random.randint(0, len(train_pc), num_objects)
         new = np.array([])
         for i in index:
-            axs = np.random.randint(0,6)
+            axs = np.random.randint(0, 6)
             origin = 0
             if axs == 0:
-                origin = max(train_pc[i,:,2])
+                origin = max(train_pc[i, :, 2])
             elif axs == 1:
-                origin = min(train_pc[i,:,2])
+                origin = min(train_pc[i, :, 2])
             elif axs == 2:
-                origin = max(train_pc[i,:,1])
+                origin = max(train_pc[i, :, 1])
             elif axs == 3:
-                origin = min(train_pc[i,:,1])
+                origin = min(train_pc[i, :, 1])
             elif axs == 4:
-                origin = max(train_pc[i,:,0])
+                origin = max(train_pc[i, :, 0])
             elif axs == 5:
-                origin = min(train_pc[i,:,0])
-            new[:,axs%3] +=  origin
-            new = np.concatenate((new,train_pc[i]),axis=0)
+                origin = min(train_pc[i, :, 0])
+            new[:, axs % 3] += origin
+            new = np.concatenate((new, train_pc[i]), axis=0)
             train_labels_seg[data] += temp_class_ids[train_labels[i]]
         train_pc_seg.append(new)
 
@@ -138,9 +140,9 @@ def semantic_seg_dataset(data_dir, num_objects, num_test_data, num_train_data, n
             scene_label[k] = i + j
             k += 1
 
-
     return (np.array(train_pc_seg), np.array(test_pc_seg),
-            np.array(train_labels_seg), np.array(test_labels_seg), class_ids_seg,np.array(scene_label))
+            np.array(train_labels_seg), np.array(test_labels_seg), class_ids_seg, np.array(scene_label))
+
 
 def visualize_cloud(point_cloud):
     """
@@ -164,12 +166,9 @@ def add_noise_and_shuffle(point_cloud, label):
     :return: the processed point cloud and the label
     :rtype: tensors
     """
-    dev_in_metres = 0.002   # <- change this value to change amount of noise
+    dev_in_metres = 0.002  # <- change this value to change amount of noise
     # add noise to the points
     point_cloud += tf.random.uniform(point_cloud.shape, -dev_in_metres, dev_in_metres, dtype=tf.float64)
     # shuffle points
     point_cloud = tf.random.shuffle(point_cloud)
     return point_cloud, label
-
-# if __name__=='__main__':
-#     a = create_point_cloud_dataset('ModelNet10/')

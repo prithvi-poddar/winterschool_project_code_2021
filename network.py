@@ -3,15 +3,6 @@ from tensorflow import keras
 from tensorflow.keras import layers
 import numpy as np
 
-def conv_bn(x, filters):
-    x = layers.Conv1D(filters, kernel_size=1, padding="valid")(x)
-    x = layers.BatchNormalization(momentum=0.0)(x)
-    return layers.Activation("relu")(x)
-
-def dense_bn(x, filters):
-    x = layers.Dense(filters)(x)
-    x = layers.BatchNormalization(momentum=0.0)(x)
-    return layers.Activation("relu")(x)
 
 def conv_bn(x, filters):
     x = layers.Conv1D(filters, kernel_size=1, padding="valid")(x)
@@ -22,8 +13,21 @@ def conv_bn(x, filters):
 def dense_bn(x, filters):
     x = layers.Dense(filters)(x)
     x = layers.BatchNormalization(momentum=0.0)(x)
-    return layers.Activation("relu")(x)    
-    
+    return layers.Activation("relu")(x)
+
+
+def conv_bn(x, filters):
+    x = layers.Conv1D(filters, kernel_size=1, padding="valid")(x)
+    x = layers.BatchNormalization(momentum=0.0)(x)
+    return layers.Activation("relu")(x)
+
+
+def dense_bn(x, filters):
+    x = layers.Dense(filters)(x)
+    x = layers.BatchNormalization(momentum=0.0)(x)
+    return layers.Activation("relu")(x)
+
+
 def tnet(inputs, num_features):
     """
     This is the core t-net of the pointnet paper
@@ -54,10 +58,11 @@ def tnet(inputs, num_features):
         kernel_initializer="zeros",
         bias_initializer=bias,
         activity_regularizer=CustomRegularizer(num_features))(x)
-    
+
     feat_t = layers.Reshape((num_features, num_features))(x)
     # Apply affine transformation to input features
     return layers.Dot(axes=(2, 1))([inputs, feat_t])
+
 
 class CustomRegularizer(keras.regularizers.Regularizer):
     """
@@ -91,7 +96,8 @@ class CustomRegularizer(keras.regularizers.Regularizer):
 
     def get_config(self):
         return {'dim': self.dim,
-                'weight':self.weight}
+                'weight': self.weight}
+
 
 def pointnet_classifier(inputs, num_classes):
     """
@@ -124,7 +130,7 @@ def pointnet_classifier(inputs, num_classes):
     x = layers.Dropout(0.3)(x)
     # Finally predict classes using a dense layer with a softmax activation
     outputs = layers.Dense(num_classes, activation="softmax")(x)
-    
+
     return outputs
 
 
@@ -144,21 +150,21 @@ def pointnet_segmenter(inputs, num_classes=10):
     x = conv_bn(x, 32)
     x = conv_bn(x, 32)
     # apply tnet on the feature vector
-    local_feature =  tnet(x, 32)
+    local_feature = tnet(x, 32)
     # extract features using some Convolutional Layers - with batch normalization and RELU activation
     x = conv_bn(local_feature, 32)
     x = conv_bn(x, 64)
-    x = conv_bn(x, 512)    
+    x = conv_bn(x, 512)
     # apply 1D global max pooling
     global_feature = layers.GlobalMaxPooling1D()(x)
     # Todo: concatenate these features with the earlier features (f)
     # you can also use skip connections if you like
-    global_feature = tf.expand_dims(input=global_feature,axis=1)
-    global_feature = tf.tile(input=global_feature, multiples=[1,300,1])
-    f = layers.concatenate([local_feature,global_feature])
+    global_feature = tf.expand_dims(input=global_feature, axis=1)
+    global_feature = tf.tile(input=global_feature, multiples=[1, 300, 1])
+    f = layers.concatenate([local_feature, global_feature])
     # extract features using some Convolutional Layers - with batch normalization and RELU activation
-    x = conv_bn(f,256)
-    x = conv_bn(x,128)
+    x = conv_bn(f, 256)
+    x = conv_bn(x, 128)
     x = conv_bn(x, 64)
     # return the output
     outputs = layers.Dense(num_classes, activation="softmax")(x)
