@@ -86,7 +86,6 @@ class CustomRegularizer(keras.regularizers.Regularizer):
         # Apply weight
         # ACompute reduce sum using tf.reduce_sum()
         return tf.reduce_sum(self.weight * tf.square(xxt - self.eye))
-        return output
 
 def pointnet_classifier(inputs, num_classes):
     """

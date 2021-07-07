@@ -62,7 +62,7 @@ def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
     encoded_train_labels = np.array(encoded_train_labels)
 
     encoded_test_labels = []
-    for idx, label in enumerate(train_labels):
+    for idx, label in enumerate(test_labels):
         one_hot = np.zeros(10)
         one_hot[label] = 1.
         encoded_test_labels.append(one_hot)
