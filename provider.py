@@ -33,7 +33,7 @@ def rotate_point_cloud(batch_data):
     for k in range(batch_data.shape[0]):
         shape_pc = batch_data[k, ...]
         rotated_data[k, ...] = np.dot(shape_pc.reshape((-1, 3)), rotation_matrix)
-    return np.array(rotated_data, dtype=np.float64)
+    return rotated_data
 
 def get_avg(points, axis=0):
   sum = 0
