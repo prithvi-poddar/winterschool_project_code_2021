@@ -9,7 +9,7 @@ import pickle
 
 import network
 import utils
-
+import provider
 
 # If using a GPU keep these lines to avoid CUDNN errors
 gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -45,6 +45,8 @@ batch_size = 32
 # print(len(train_pc))
 train_dataset = train_dataset.shuffle(len(train_pc)).map(utils.add_noise_and_shuffle).batch(batch_size)
 test_dataset = test_dataset.shuffle(len(test_pc)).batch(batch_size)
+
+train_dataset = train_dataset.map(provider.rotate_point_cloud).batch(batch_size)
 
 inputs = keras.Input(shape=(num_points_per_cloud, 3))
 outputs = network.pointnet_classifier(inputs, num_classes=10)
