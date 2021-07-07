@@ -70,6 +70,12 @@ def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
             np.array(encoded_train_labels), np.array(encoded_test_labels), class_ids)
 
 def semantic_seg_dataset(data_dir, num_objects, num_test_data, num_train_data, num_points_per_cloud=1024):
+    """
+    creates a semantic dataset and returns train points, test points, train labels, test labels
+    num_objects: number of objects per scene
+    num_train_data: number of training objects you want to create
+    num_test_data: number of testing objects you want to create
+    """
     train_pc, test_pc, train_labels, test_labels, class_ids = create_point_cloud_dataset(data_dir, num_points_per_cloud)
     train_pc_seg = []
     test_pc_seg = []
@@ -126,7 +132,8 @@ def semantic_seg_dataset(data_dir, num_objects, num_test_data, num_train_data, n
             
         train_pc_seg.append(new)
 
-    return (np.array(train_pc_seg), np.array(test_pc_seg))
+    # pc_seg structure is scene x points x (x,y,z, hot encoded class)
+    return (np.array(train_pc_seg[:,:,:3]), np.array(test_pc_seg[:,:,:3]), np.array(train_pc_seg[:,:,-9:]), np.array(test_pc_seg[:,:,-9:]))
 
 def visualize_cloud(point_cloud):
     """
@@ -156,6 +163,3 @@ def add_noise_and_shuffle(point_cloud, label):
     # shuffle points
     point_cloud = tf.random.shuffle(point_cloud)
     return point_cloud, label
-
-if __name__=='__main__':
-    a, b = semantic_seg_dataset('ModelNet10/', 2, 2, 2)
