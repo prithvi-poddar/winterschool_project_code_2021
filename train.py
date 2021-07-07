@@ -22,18 +22,18 @@ DATA_DIR = "ModelNet10/"     # <- Set this path correctly
 
 
 num_points_per_cloud = 4096
-# train_pc, test_pc, train_labels, test_labels, class_ids = utils.create_point_cloud_dataset(DATA_DIR, num_points_per_cloud)
+train_pc, test_pc, train_labels, test_labels, class_ids = utils.create_point_cloud_dataset(DATA_DIR, num_points_per_cloud)
 
 # print(train_pc.shape)
-# train_pc = provider.normalize_pc(train_pc)
+train_pc = provider.normalize_pc(train_pc)
 # print(train_pc.shape)
-# test_pc = provider.normalize_pc(test_pc)
+test_pc = provider.normalize_pc(test_pc)
 
-# pickle.dump(train_pc, open("trainpc.pkl", "wb"))
-# pickle.dump(test_pc, open("testpc.pkl", "wb"))
-# pickle.dump(train_labels, open("trainlabels.pkl", "wb"))
-# pickle.dump(test_labels, open("testlabels.pkl", "wb"))
-# pickle.dump(class_ids, open("class_ids.pkl", "wb"))
+pickle.dump(train_pc, open("trainpc.pkl", "wb"))
+pickle.dump(test_pc, open("testpc.pkl", "wb"))
+pickle.dump(train_labels, open("trainlabels.pkl", "wb"))
+pickle.dump(test_labels, open("testlabels.pkl", "wb"))
+pickle.dump(class_ids, open("class_ids.pkl", "wb"))
 
 
 # load the data from pickle files if already present
@@ -79,18 +79,3 @@ num_epochs = 500      # <- change this value as needed
 model.fit(train_dataset, epochs=num_epochs, validation_data=test_dataset, callbacks=[tensorboard_callback])
 
 model.save('classifier_model')
-
-
-
-
-# visualize results
-# data = test_dataset.take(1)
-# point_clouds, labels = list(data)[0]  # this is one batch of data
-
-# # predict labels using the model
-# preds = model.predict(point_clouds)
-# preds = tf.math.argmax(preds, -1)
-
-# 3. Display some clouds using matplotlib scatter plot along with true and predicted labels
-
-# 4. Display a confusion matrix
