@@ -39,7 +39,7 @@ def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
 
         # get the files in the train folder
         train_files = glob.glob(os.path.join(folder, "train/*"))
-        for f in train_files:
+        for f in train_files[:10]:
             # TODO: Fill this part
             cad_mesh = trimesh.load(f)  # <- Set path to a .off file
             points = trimesh.sample.sample_surface(cad_mesh, num_points_per_cloud)[0]
@@ -47,7 +47,7 @@ def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
             train_labels.append(folder[11:])
         # get the files in the test folder
         test_files = glob.glob(os.path.join(folder, "test/*"))
-        for f in test_files:
+        for f in test_files[:10]:
             # TODO: FIll this part
             cad_mesh = trimesh.load(f)  # <- Set path to a .off file
             points = trimesh.sample.sample_surface(cad_mesh, num_points_per_cloud)[0]
@@ -57,7 +57,7 @@ def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
     return (np.array(train_pc), np.array(test_pc),
             np.array(train_labels), np.array(test_labels), class_ids)
 
-def semantic_seg_dataset(train_pc, test_pc, train_labels, test_labels, class_ids,num_objects,num_test_data,num_train_data):
+def semantic_seg_dataset(train_pc, test_pc, train_labels, test_labels, class_ids,num_objects,num_test_data,num_train_data,resampling_size):
     train_pc_seg = []
     test_pc_seg = []
     train_labels_seg = np.zeros((len(class_ids),len(class_ids)))
@@ -73,7 +73,9 @@ def semantic_seg_dataset(train_pc, test_pc, train_labels, test_labels, class_ids
     
     for data in range(num_test_data): 
         index = np.random.randint(0,len(test_pc),num_objects)   
-        new = test_pc[index[0]]
+        # new = np.random.choice(test_pc[index[0]],size=len(test_pc[index[0]])/num_objects,replace=False)
+        new = np.random.choice(test_pc[index[0]].shape[0],size=int(resampling_size/num_objects),replace=False)
+        new = test_pc[index[0],new]
         for i in index[1:]:
             axs = np.random.randint(0,6)
             origin = 0
@@ -91,14 +93,16 @@ def semantic_seg_dataset(train_pc, test_pc, train_labels, test_labels, class_ids
                 origin = min(test_pc[i,:,0])
 
             new[:,axs%3] +=  origin
-            new = np.concatenate((new,test_pc[i]),axis=0)
+            new = np.concatenate((new,test_pc[i,np.random.choice(test_pc[i].shape[0],size=int(resampling_size/num_objects),replace=False)]),axis=0)
 
             test_labels_seg[data] += temp_class_ids[test_labels[i]]
         test_pc_seg.append(new)
 
     for data in range(num_train_data): 
         index = np.random.randint(0,len(train_pc),num_objects)   
-        new = train_pc[index[0]]
+        # new = np.random.choice(train_pc[index[0]],size=len(train_pc[index[0]])/num_objects,replace=False)
+        new = np.random.choice(train_pc[index[0]].shape[0],size=int(resampling_size/num_objects),replace=False)
+        new = train_pc[index[0],new]
         for i in index[1:]:
             axs = np.random.randint(0,6)
             origin = 0
@@ -115,7 +119,7 @@ def semantic_seg_dataset(train_pc, test_pc, train_labels, test_labels, class_ids
             elif axs == 5:
                 origin = min(train_pc[i,:,0])
             new[:,axs%3] +=  origin
-            new = np.concatenate((new,train_pc[i]),axis=0)
+            new = np.concatenate((new,train_pc[i,np.random.choice(train_pc[i].shape[0],size=int(resampling_size/num_objects),replace=False)]),axis=0)
             train_labels_seg[data] += temp_class_ids[train_labels[i]]
         train_pc_seg.append(new)
 
@@ -160,6 +164,10 @@ def add_noise_and_shuffle(point_cloud, label):
 
 if __name__=='__main__':
     a,b,c,d,e = create_point_cloud_dataset('ModelNet10/')
-    train,test,train_l,test_l,class_id,scene_l = semantic_seg_dataset(a, b, c, d, e,2,2,2)
+    print([len(a[0]),len(b[0])])
+    resampling = int(len(a[0])/3)
+    if resampling%2!=0:
+        resampling += 1
+    train,test,train_l,test_l,class_id,scene_l = semantic_seg_dataset(a, b, c, d, e,2,2,2,resampling)
     visualize_cloud(train[0])
     # print(a)
