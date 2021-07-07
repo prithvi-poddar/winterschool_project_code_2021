@@ -1,11 +1,12 @@
 import os
 import glob
+from numpy.core.fromnumeric import shape
 import trimesh
 import trimesh.sample
 import numpy as np
 import matplotlib.pyplot as plt
 from trimesh.triangles import bounds_tree
-import tensorflow as tf
+# import tensorflow as tf
 
 def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
     """
@@ -65,15 +66,15 @@ def semantic_seg_dataset(train_pc, test_pc, train_labels, test_labels, class_ids
     temp_class_ids = {}
     scene_label = np.zeros((len(class_ids)**num_objects,len(class_ids)))
     for i in range(len(class_ids)):
-        temp_class_ids[class_ids[i]] = class_ids_seg[i]
+        temp_class_ids[class_ids[str(i)]] = class_ids_seg[i]
 
     for c_id in range(len(class_ids)):
         class_ids_seg[c_id,c_id] = 1
     
     for data in range(num_test_data): 
         index = np.random.randint(0,len(test_pc),num_objects)   
-        new = np.array([])
-        for i in index:
+        new = test_pc[index[0]]
+        for i in index[1:]:
             axs = np.random.randint(0,6)
             origin = 0
             if axs == 0:
@@ -88,15 +89,17 @@ def semantic_seg_dataset(train_pc, test_pc, train_labels, test_labels, class_ids
                 origin = max(test_pc[i,:,0])
             elif axs == 5:
                 origin = min(test_pc[i,:,0])
+
             new[:,axs%3] +=  origin
             new = np.concatenate((new,test_pc[i]),axis=0)
+
             test_labels_seg[data] += temp_class_ids[test_labels[i]]
         test_pc_seg.append(new)
 
     for data in range(num_train_data): 
         index = np.random.randint(0,len(train_pc),num_objects)   
-        new = np.array([])
-        for i in index:
+        new = train_pc[index[0]]
+        for i in index[1:]:
             axs = np.random.randint(0,6)
             origin = 0
             if axs == 0:
@@ -155,6 +158,8 @@ def add_noise_and_shuffle(point_cloud, label):
     point_cloud = tf.random.shuffle(point_cloud)
     return point_cloud, label
 
-# if __name__=='__main__':
-#     a = create_point_cloud_dataset('ModelNet10/')
-#     print(a)
+if __name__=='__main__':
+    a,b,c,d,e = create_point_cloud_dataset('ModelNet10/')
+    train,test,train_l,test_l,class_id,scene_l = semantic_seg_dataset(a, b, c, d, e,2,2,2)
+    visualize_cloud(train[0])
+    # print(a)
