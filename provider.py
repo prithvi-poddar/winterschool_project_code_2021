@@ -34,3 +34,33 @@ def rotate_point_cloud(batch_data):
         shape_pc = batch_data[k, ...]
         rotated_data[k, ...] = np.dot(shape_pc.reshape((-1, 3)), rotation_matrix)
     return rotated_data
+
+def get_avg(points, axis=0):
+  sum = 0
+  for point in points:
+    sum += point[axis]
+  return sum/len(points)
+
+def normalize_pc(points):
+  normalised = []
+  for point in points:
+    avg_x = get_avg(point, 0)
+    avg_y = get_avg(point, 1)
+    avg_z = get_avg(point, 2)
+
+    normalised_points = []
+
+    K = 0
+    for p in point:
+      K_ = np.sqrt((p[0]-avg_x)**2 + (p[1]-avg_y)**2 + (p[2]-avg_z)**2)
+      if K_ > K:
+        K = K_
+
+    for p in point:
+      x_norm = (p[0]-avg_x)/K
+      y_norm = (p[1]-avg_y)/K
+      z_norm = (p[2]-avg_z)/K
+      normalised_points.append([x_norm, y_norm, z_norm])
+
+    normalised.append(np.array(normalised_points))
+  return np.array(normalised)

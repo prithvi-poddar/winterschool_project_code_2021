@@ -22,11 +22,17 @@ DATA_DIR = "ModelNet10/"     # <- Set this path correctly
 num_points_per_cloud = 4096
 # train_pc, test_pc, train_labels, test_labels, class_ids = utils.create_point_cloud_dataset(DATA_DIR, num_points_per_cloud)
 
+# print(train_pc.shape)
+# train_pc = provider.normalize_pc(train_pc)
+# print(train_pc.shape)
+# test_pc = provider.normalize_pc(test_pc)
+
 # pickle.dump(train_pc, open("trainpc.pkl", "wb"))
 # pickle.dump(test_pc, open("testpc.pkl", "wb"))
 # pickle.dump(train_labels, open("trainlabels.pkl", "wb"))
 # pickle.dump(test_labels, open("testlabels.pkl", "wb"))
 # pickle.dump(class_ids, open("class_ids.pkl", "wb"))
+
 
 # load the data from pickle files if already present
 train_pc = pickle.load(open("trainpc.pkl", "rb"))
@@ -35,18 +41,18 @@ test_pc = pickle.load(open("testpc.pkl", "rb"))
 test_labels = pickle.load(open("testlabels.pkl", "rb"))
 class_ids = pickle.load(open("class_ids.pkl", "rb"))
 
+train_pc = provider.rotate_point_cloud(train_pc)
+# test_pc = provider.rotate_point_cloud(test_pc)
+
 # Create tensorflow data loaders from the numpy arrays
-# print(test_pc.shape)
-# print(test_labels.shape)
+
 train_dataset = tf.data.Dataset.from_tensor_slices((train_pc, train_labels))
 test_dataset = tf.data.Dataset.from_tensor_slices((test_pc, test_labels))
 
 batch_size = 32
-# print(len(train_pc))
+
 train_dataset = train_dataset.shuffle(len(train_pc)).map(utils.add_noise_and_shuffle).batch(batch_size)
 test_dataset = test_dataset.shuffle(len(test_pc)).batch(batch_size)
-
-train_dataset = train_dataset.map(provider.rotate_point_cloud).batch(batch_size)
 
 inputs = keras.Input(shape=(num_points_per_cloud, 3))
 outputs = network.pointnet_classifier(inputs, num_classes=10)
@@ -64,7 +70,7 @@ model.compile(
 )
 
 # train the network
-num_epochs = 1      # <- change this value as needed
+num_epochs = 500      # <- change this value as needed
 model.fit(train_dataset, epochs=num_epochs, validation_data=test_dataset)
 
 model.save('classifier_model')
