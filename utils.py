@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from trimesh.triangles import bounds_tree
 import tensorflow as tf
+import pickle
 
 
 def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
@@ -171,3 +172,16 @@ def add_noise_and_shuffle(point_cloud, label):
     # shuffle points
     point_cloud = tf.random.shuffle(point_cloud)
     return point_cloud, label
+
+if __name__=='__main__':
+    train_pc, test_pc, train_labels, test_labels = semantic_seg_dataset('ModelNet10/', 4, 1000, 4000, 1024)
+    pickle.dump(train_pc, open("train_seg4.pkl", "wb"))
+    pickle.dump(test_pc, open("test_seg4.pkl", "wb"))
+    pickle.dump(train_labels, open("train_seg4_labels.pkl", "wb"))
+    pickle.dump(test_labels, open("test_seg4_labels.pkl", "wb"))
+    train_pc, test_pc, train_labels, test_labels = semantic_seg_dataset('ModelNet10/', 2, 1000, 4000, 2048)
+    pickle.dump(train_pc, open("train_seg2.pkl", "wb"))
+    pickle.dump(test_pc, open("test_seg2.pkl", "wb"))
+    pickle.dump(train_labels, open("train_seg2_labels.pkl", "wb"))
+    pickle.dump(test_labels, open("test_seg2_labels.pkl", "wb"))
+    
