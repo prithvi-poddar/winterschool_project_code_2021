@@ -159,9 +159,9 @@ def add_noise_and_shuffle(point_cloud, label):
     :return: the processed point cloud and the label
     :rtype: tensors
     """
-    dev_in_metres = 0.002  # <- change this value to change amount of noise
+    dev_in_metres = 0.05  # <- change this value to change amount of noise
     # add noise to the points
     point_cloud += tf.random.uniform(point_cloud.shape, -dev_in_metres, dev_in_metres, dtype=tf.float64)
     # shuffle points
-    point_cloud = tf.random.shuffle(point_cloud)
+    # point_cloud = tf.random.shuffle(point_cloud)
     return point_cloud, label

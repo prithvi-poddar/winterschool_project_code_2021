@@ -6,6 +6,8 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from matplotlib import pyplot as plt
 import pickle
+import tensorboard
+from datetime import datetime
 
 import network
 import utils
@@ -62,16 +64,19 @@ outputs = network.pointnet_classifier(inputs, num_classes=10)
 model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
 model.summary()
 
+logdir = "logs/classifier/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+tensorboard_callback = keras.callbacks.TensorBoard(log_dir=logdir)
+
 # 2. Set the loss function, optimizer and metrics to print
 model.compile(
     loss=keras.losses.CategoricalCrossentropy(),     # <- choose a suitable loss function
-    optimizer=keras.optimizers.Adam(learning_rate=0.0001),      # <- you may modify this if you like
+    optimizer=keras.optimizers.Adam(learning_rate=0.00001),      # <- you may modify this if you like
     metrics=["accuracy"],    # <- choose a suitable metric, https://www.tensorflow.org/api_docs/python/tf/keras/metrics
 )
 
 # train the network
 num_epochs = 500      # <- change this value as needed
-model.fit(train_dataset, epochs=num_epochs, validation_data=test_dataset)
+model.fit(train_dataset, epochs=num_epochs, validation_data=test_dataset, callbacks=[tensorboard_callback])
 
 model.save('classifier_model')
 
