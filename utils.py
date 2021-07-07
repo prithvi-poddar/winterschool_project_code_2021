@@ -5,6 +5,7 @@ import trimesh
 import trimesh.sample
 import numpy as np
 import matplotlib.pyplot as plt
+from trimesh.triangles import bounds_tree
 import tensorflow as tf
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
@@ -70,6 +71,76 @@ def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
     return (np.array(train_pc), np.array(test_pc),
             np.array(encoded_train_labels), np.array(encoded_test_labels), class_ids)
 
+def semantic_seg_dataset(data_dir, num_objects, num_test_data, num_train_data, num_points_per_cloud=1024):
+    train_pc, test_pc, train_labels, test_labels, class_ids = create_point_cloud_dataset(data_dir, num_points_per_cloud)
+    train_pc_seg = []
+    test_pc_seg = []
+    train_labels_seg = np.zeros((len(class_ids),len(class_ids)))
+    test_labels_seg = np.zeros((len(test_pc),len(class_ids)))
+    class_ids_seg = np.zeros((len(class_ids),len(class_ids)))
+    temp_class_ids = {}
+    scene_label = np.zeros((len(class_ids)**num_objects,len(class_ids)))
+    for i in range(len(class_ids)):
+        temp_class_ids[class_ids[i]] = class_ids_seg[i]
+
+    for c_id in range(len(class_ids)):
+        class_ids_seg[c_id,c_id] = 1
+    
+    for data in range(num_test_data): 
+        index = np.random.randint(0,len(test_pc),num_objects)   
+        new = np.array([])
+        for i in index:
+            axs = np.random.randint(0,6)
+            origin = 0
+            if axs == 0:
+                origin = max(test_pc[i,:,2])
+            elif axs == 1:
+                origin = min(test_pc[i,:,2])
+            elif axs == 2:
+                origin = max(test_pc[i,:,1])
+            elif axs == 3:
+                origin = min(test_pc[i,:,1])
+            elif axs == 4:
+                origin = max(test_pc[i,:,0])
+            elif axs == 5:
+                origin = min(test_pc[i,:,0])
+            new[:,axs%3] +=  origin
+            new = np.concatenate((new,test_pc[i]),axis=0)
+            test_labels_seg[data] += temp_class_ids[test_labels[i]]
+        test_pc_seg.append(new)
+
+    for data in range(num_train_data): 
+        index = np.random.randint(0,len(train_pc),num_objects)   
+        new = np.array([])
+        for i in index:
+            axs = np.random.randint(0,6)
+            origin = 0
+            if axs == 0:
+                origin = max(train_pc[i,:,2])
+            elif axs == 1:
+                origin = min(train_pc[i,:,2])
+            elif axs == 2:
+                origin = max(train_pc[i,:,1])
+            elif axs == 3:
+                origin = min(train_pc[i,:,1])
+            elif axs == 4:
+                origin = max(train_pc[i,:,0])
+            elif axs == 5:
+                origin = min(train_pc[i,:,0])
+            new[:,axs%3] +=  origin
+            new = np.concatenate((new,train_pc[i]),axis=0)
+            train_labels_seg[data] += temp_class_ids[train_labels[i]]
+        train_pc_seg.append(new)
+
+    k = 0
+    for i in class_ids_seg:
+        for j in class_ids_seg:
+            scene_label[k] = i + j
+            k += 1
+
+
+    return (np.array(train_pc_seg), np.array(test_pc_seg),
+            np.array(train_labels_seg), np.array(test_labels_seg), class_ids_seg,np.array(scene_label))
 
 def visualize_cloud(point_cloud):
     """

@@ -3,6 +3,15 @@ from tensorflow import keras
 from tensorflow.keras import layers
 import numpy as np
 
+def conv_bn(x, filters):
+    x = layers.Conv1D(filters, kernel_size=1, padding="valid")(x)
+    x = layers.BatchNormalization(momentum=0.0)(x)
+    return layers.Activation("relu")(x)
+
+def dense_bn(x, filters):
+    x = layers.Dense(filters)(x)
+    x = layers.BatchNormalization(momentum=0.0)(x)
+    return layers.Activation("relu")(x)
 
 def conv_bn(x, filters):
     x = layers.Conv1D(filters, kernel_size=1, padding="valid")(x)
@@ -148,5 +157,4 @@ def pointnet_segmenter(inputs, num_classes=10):
     x = conv_bn(x, 64)
     # return the output
     outputs = layers.Dense(num_classes, activation="softmax")(x)
-    
     return outputs
