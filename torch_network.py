@@ -1,5 +1,4 @@
 import torch as T
-from torch.jit import Error
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.parallel
