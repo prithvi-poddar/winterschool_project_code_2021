@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from trimesh.triangles import bounds_tree
 # import tensorflow as tf
 
-def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
+def create_point_cloud_dataset(data_dir, num_points_per_cloud=512):
     """
     Given the path to the ModelNet10 dataset, samples the models and creates point clouds
     :param data_dir: path to the ModelNet10 dataset
@@ -39,7 +39,7 @@ def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
 
         # get the files in the train folder
         train_files = glob.glob(os.path.join(folder, "train/*"))
-        for f in train_files[:10]:
+        for f in train_files:
             # TODO: Fill this part
             cad_mesh = trimesh.load(f)  # <- Set path to a .off file
             points = trimesh.sample.sample_surface(cad_mesh, num_points_per_cloud)[0]
@@ -47,7 +47,7 @@ def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
             train_labels.append(folder[11:])
         # get the files in the test folder
         test_files = glob.glob(os.path.join(folder, "test/*"))
-        for f in test_files[:10]:
+        for f in test_files:
             # TODO: FIll this part
             cad_mesh = trimesh.load(f)  # <- Set path to a .off file
             points = trimesh.sample.sample_surface(cad_mesh, num_points_per_cloud)[0]
@@ -62,72 +62,58 @@ def semantic_seg_dataset(train_pc, test_pc, train_labels, test_labels, class_ids
     test_pc_seg = []
     train_labels_seg = np.zeros((len(class_ids),len(class_ids)))
     test_labels_seg = np.zeros((len(test_pc),len(class_ids)))
-    class_ids_seg = np.zeros((len(class_ids),len(class_ids)))
+    class_ids_seg = np.eye(len(class_ids))
     temp_class_ids = {}
-    scene_label = np.zeros((len(class_ids)**num_objects,len(class_ids)))
-    for i in range(len(class_ids)):
-        temp_class_ids[class_ids[str(i)]] = class_ids_seg[i]
+    scene_label = np.zeros((len(class_ids)**num_objects))
 
-    for c_id in range(len(class_ids)):
-        class_ids_seg[c_id,c_id] = 1
+    for i in range(len(class_ids)):
+        temp_class_ids[class_ids[str(i)]] = i
     
     for data in range(num_test_data): 
         index = np.random.randint(0,len(test_pc),num_objects)   
-        # new = np.random.choice(test_pc[index[0]],size=len(test_pc[index[0]])/num_objects,replace=False)
-        new = np.random.choice(test_pc[index[0]].shape[0],size=int(resampling_size/num_objects),replace=False)
-        new = test_pc[index[0],new]
+        new = test_pc[index[0]]
+        lab = []
         for i in index[1:]:
-            axs = np.random.randint(0,6)
+            axs = np.random.randint(0,4)
             origin = 0
             if axs == 0:
-                origin = max(test_pc[i,:,2])
+                origin = max(test_pc[i,:,0])
             elif axs == 1:
-                origin = min(test_pc[i,:,2])
-            elif axs == 2:
                 origin = max(test_pc[i,:,1])
+            elif axs == 2:
+                origin = min(test_pc[i,:,0])
             elif axs == 3:
                 origin = min(test_pc[i,:,1])
-            elif axs == 4:
-                origin = max(test_pc[i,:,0])
-            elif axs == 5:
-                origin = min(test_pc[i,:,0])
 
-            new[:,axs%3] +=  origin
-            new = np.concatenate((new,test_pc[i,np.random.choice(test_pc[i].shape[0],size=int(resampling_size/num_objects),replace=False)]),axis=0)
+            new[:,axs%2] +=  ((-1)**(axs%2))*origin
+            new = np.concatenate((new,test_pc[i]),axis=0)
 
-            test_labels_seg[data] += temp_class_ids[test_labels[i]]
+            lab = lab+[temp_class_ids[test_labels[i]]]
+        test_labels_seg[data] 
         test_pc_seg.append(new)
 
     for data in range(num_train_data): 
         index = np.random.randint(0,len(train_pc),num_objects)   
-        # new = np.random.choice(train_pc[index[0]],size=len(train_pc[index[0]])/num_objects,replace=False)
-        new = np.random.choice(train_pc[index[0]].shape[0],size=int(resampling_size/num_objects),replace=False)
-        new = train_pc[index[0],new]
+        new = train_pc[index[0]]
+        lab = []
         for i in index[1:]:
-            axs = np.random.randint(0,6)
+            axs = np.random.randint(0,4)
             origin = 0
             if axs == 0:
-                origin = max(train_pc[i,:,2])
+                origin = max(train_pc[i,:,0])
             elif axs == 1:
-                origin = min(train_pc[i,:,2])
-            elif axs == 2:
                 origin = max(train_pc[i,:,1])
+            elif axs == 2:
+                origin = min(train_pc[i,:,0])
             elif axs == 3:
                 origin = min(train_pc[i,:,1])
-            elif axs == 4:
-                origin = max(train_pc[i,:,0])
-            elif axs == 5:
-                origin = min(train_pc[i,:,0])
-            new[:,axs%3] +=  origin
-            new = np.concatenate((new,train_pc[i,np.random.choice(train_pc[i].shape[0],size=int(resampling_size/num_objects),replace=False)]),axis=0)
-            train_labels_seg[data] += temp_class_ids[train_labels[i]]
-        train_pc_seg.append(new)
 
-    k = 0
-    for i in class_ids_seg:
-        for j in class_ids_seg:
-            scene_label[k] = i + j
-            k += 1
+            new[:,axs%2] +=  ((-1)**(axs%2))*origin
+            new = np.concatenate((new,train_pc[i]),axis=0)
+            lab = lab+[temp_class_ids[test_labels[i]]]
+
+        train_labels_seg[data] += temp_class_ids[train_labels[i]]
+        train_pc_seg.append(new)
 
 
     return (np.array(train_pc_seg), np.array(test_pc_seg),
@@ -170,4 +156,5 @@ if __name__=='__main__':
         resampling += 1
     train,test,train_l,test_l,class_id,scene_l = semantic_seg_dataset(a, b, c, d, e,2,2,2,resampling)
     visualize_cloud(train[0])
+    print([train_l[0],test_l[0],class_id[0],scene_l[0]])
     # print(a)
