@@ -64,7 +64,9 @@ class CustomRegularizer(keras.regularizers.Regularizer):
     This class implements a regularizer that makes the output to be orthogonal.
     In other words, it adds a loss |I-AA^T|^2 on the output A. Equation 2 of the paper.
     """
+
     def __init__(self, dim, weight=0.001):
+        super(CustomRegularizer, self).__init__()
         """
         Initializes the class
         :param dim: dimensions of the input tensor
@@ -74,7 +76,7 @@ class CustomRegularizer(keras.regularizers.Regularizer):
         """
         self.dim = dim
         self.weight = weight
-        self.eye = tf.eye(dim)
+        # self.eye = tf.eye(dim)
 
     def __call__(self, x):
         # TODO: define the custom regularizer here
@@ -85,7 +87,11 @@ class CustomRegularizer(keras.regularizers.Regularizer):
         # Compute (I-outerproduct)^2 element wise. use tf.square()
         # Apply weight
         # ACompute reduce sum using tf.reduce_sum()
-        return tf.reduce_sum(self.weight * tf.square(xxt - self.eye))
+        return tf.reduce_sum(self.weight * tf.square(xxt - tf.eye(self.dim)))
+
+    def get_config(self):
+        return {'dim': self.dim,
+                'weight':self.weight}
 
 def pointnet_classifier(inputs, num_classes):
     """
