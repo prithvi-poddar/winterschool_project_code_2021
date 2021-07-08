@@ -143,6 +143,7 @@ def pointnet_segmenter(inputs, num_classes=10):
     :type num_classes: int
     :rtype: tensor
     """
+    num_points_per_cloud = inputs.shape[1]
     # build the network using the following layers
     # apply tnet to the input data
     x = tnet(inputs, 3)
@@ -154,13 +155,13 @@ def pointnet_segmenter(inputs, num_classes=10):
     # extract features using some Convolutional Layers - with batch normalization and RELU activation
     x = conv_bn(local_feature, 32)
     x = conv_bn(x, 64)
-    x = conv_bn(x, 512)
+    x = conv_bn(x, 256)
     # apply 1D global max pooling
     global_feature = layers.GlobalMaxPooling1D()(x)
     # Todo: concatenate these features with the earlier features (f)
     # you can also use skip connections if you like
     global_feature = tf.expand_dims(input=global_feature, axis=1)
-    global_feature = tf.tile(input=global_feature, multiples=[1, 300, 1])
+    global_feature = tf.tile(input=global_feature, multiples=[1, num_points_per_cloud, 1])
     f = layers.concatenate([local_feature, global_feature])
     # extract features using some Convolutional Layers - with batch normalization and RELU activation
     x = conv_bn(f, 256)
