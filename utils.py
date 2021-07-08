@@ -138,7 +138,7 @@ def semantic_seg_dataset(data_dir, num_objects, num_test_data, num_train_data, n
             label_i = np.reshape(np.tile(test_labels[i], len(test_pc[i])), (-1,10))
             label = np.concatenate((label, label_i), axis=0)
             scene = np.concatenate((scene, test_pc[i]), axis=0)
-            
+
         test_pc_seg.append(scene)
         test_seg_labels.append(label)
 

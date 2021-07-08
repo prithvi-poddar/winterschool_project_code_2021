@@ -136,3 +136,14 @@ trainlabels.pkl
 trainpc.pkl
 sample.ipynb
 .vscode/
+test_seg2.pkl
+test_seg2_labels.pkl
+test_seg4.pkl
+test_seg4_labels.pkl
+train_seg2.pkl
+train_seg2_labels.pkl
+train_seg4.pkl
+train_seg4_labels.pkl
+train_segmentation.py
+sample.ipynb
+sample.py
