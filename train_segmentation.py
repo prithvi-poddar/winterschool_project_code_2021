@@ -27,52 +27,52 @@ DATA_DIR = "ModelNet10/"     # <- Set this path correctly
 
 ######################## Generating the data ##############################
 
-# train_pc, test_pc, train_labels, test_labels = utils.semantic_seg_dataset('ModelNet10/', 4, 500, 2000, 256)
-# pickle.dump(train_pc, open("train_seg4.pkl", "wb"))
-# pickle.dump(test_pc, open("test_seg4.pkl", "wb"))
-# pickle.dump(train_labels, open("train_seg4_labels.pkl", "wb"))
-# pickle.dump(test_labels, open("test_seg4_labels.pkl", "wb"))
-# train_pc, test_pc, train_labels, test_labels = utils.semantic_seg_dataset('ModelNet10/', 2, 500, 2000, 512)
-# pickle.dump(train_pc, open("train_seg2.pkl", "wb"))
-# pickle.dump(test_pc, open("test_seg2.pkl", "wb"))
-# pickle.dump(train_labels, open("train_seg2_labels.pkl", "wb"))
-# pickle.dump(test_labels, open("test_seg2_labels.pkl", "wb"))
+train_pc, test_pc, train_labels, test_labels = utils.semantic_seg_dataset('ModelNet10/', 4, 500, 2500, 512)
+pickle.dump(train_pc, open("train_seg4.pkl", "wb"))
+pickle.dump(test_pc, open("test_seg4.pkl", "wb"))
+pickle.dump(train_labels, open("train_seg4_labels.pkl", "wb"))
+pickle.dump(test_labels, open("test_seg4_labels.pkl", "wb"))
+train_pc, test_pc, train_labels, test_labels = utils.semantic_seg_dataset('ModelNet10/', 2, 500, 2500, 1024)
+pickle.dump(train_pc, open("train_seg2.pkl", "wb"))
+pickle.dump(test_pc, open("test_seg2.pkl", "wb"))
+pickle.dump(train_labels, open("train_seg2_labels.pkl", "wb"))
+pickle.dump(test_labels, open("test_seg2_labels.pkl", "wb"))
 
-# train_pc4 = pickle.load(open("train_seg4.pkl", "rb"))
-# train_labels4 = pickle.load(open("train_seg4_labels.pkl", "rb"))
-# test_pc4 = pickle.load(open("test_seg4.pkl", "rb"))
-# test_labels4 = pickle.load(open("test_seg4_labels.pkl", "rb"))
+train_pc4 = pickle.load(open("train_seg4.pkl", "rb"))
+train_labels4 = pickle.load(open("train_seg4_labels.pkl", "rb"))
+test_pc4 = pickle.load(open("test_seg4.pkl", "rb"))
+test_labels4 = pickle.load(open("test_seg4_labels.pkl", "rb"))
 
-# train_pc2 = pickle.load(open("train_seg2.pkl", "rb"))
-# train_labels2 = pickle.load(open("train_seg2_labels.pkl", "rb"))
-# test_pc2 = pickle.load(open("test_seg2.pkl", "rb"))
-# test_labels2 = pickle.load(open("test_seg2_labels.pkl", "rb"))
-# class_ids = pickle.load(open("class_ids.pkl", "rb"))
+train_pc2 = pickle.load(open("train_seg2.pkl", "rb"))
+train_labels2 = pickle.load(open("train_seg2_labels.pkl", "rb"))
+test_pc2 = pickle.load(open("test_seg2.pkl", "rb"))
+test_labels2 = pickle.load(open("test_seg2_labels.pkl", "rb"))
+class_ids = pickle.load(open("class_ids.pkl", "rb"))
 
-# train_pc = np.concatenate((train_pc4, train_pc2), axis=0)
-# test_pc = np.concatenate((test_pc4, test_pc2), axis=0)
-# train_labels = np.concatenate((train_labels4, train_labels2), axis=0)
-# test_labels = np.concatenate((test_labels4, test_labels2), axis=0)
+train_pc = np.concatenate((train_pc4, train_pc2), axis=0)
+test_pc = np.concatenate((test_pc4, test_pc2), axis=0)
+train_labels = np.concatenate((train_labels4, train_labels2), axis=0)
+test_labels = np.concatenate((test_labels4, test_labels2), axis=0)
 
-# # print(train_pc.shape)
-# train_pc = provider.normalize_pc(train_pc)
-# # print(train_pc.shape)
-# test_pc = provider.normalize_pc(test_pc)
+# print(train_pc.shape)
+train_pc = provider.normalize_pc(train_pc)
+# print(train_pc.shape)
+test_pc = provider.normalize_pc(test_pc)
 
-# pickle.dump(train_pc, open("trainpc_seg.pkl", "wb"))
-# pickle.dump(test_pc, open("testpc_seg.pkl", "wb"))
-# pickle.dump(train_labels, open("trainlabels_seg.pkl", "wb"))
-# pickle.dump(test_labels, open("testlabels_seg.pkl", "wb"))
+pickle.dump(train_pc, open("trainpc_seg.pkl", "wb"))
+pickle.dump(test_pc, open("testpc_seg.pkl", "wb"))
+pickle.dump(train_labels, open("trainlabels_seg.pkl", "wb"))
+pickle.dump(test_labels, open("testlabels_seg.pkl", "wb"))
 
 ######################## Generating the data ##############################
 
 
 #load data
-train_pc = pickle.load(open("trainpc_seg.pkl", "rb"))
-train_labels = pickle.load(open("trainlabels_seg.pkl", "rb"))
-test_pc = pickle.load(open("testpc_seg.pkl", "rb"))
-test_labels = pickle.load(open("testlabels_seg.pkl", "rb"))
-class_ids = pickle.load(open("class_ids.pkl", "rb"))
+# train_pc = pickle.load(open("trainpc_seg.pkl", "rb"))
+# train_labels = pickle.load(open("trainlabels_seg.pkl", "rb"))
+# test_pc = pickle.load(open("testpc_seg.pkl", "rb"))
+# test_labels = pickle.load(open("testlabels_seg.pkl", "rb"))
+# class_ids = pickle.load(open("class_ids.pkl", "rb"))
 
 print(train_pc.shape)
 
@@ -84,7 +84,7 @@ train_pc = provider.rotate_point_cloud(train_pc)
 train_dataset = tf.data.Dataset.from_tensor_slices((train_pc, train_labels))
 test_dataset = tf.data.Dataset.from_tensor_slices((test_pc, test_labels))
 
-batch_size = 8
+batch_size = 16
 
 train_dataset = train_dataset.shuffle(len(train_pc)).map(utils.add_noise_and_shuffle).batch(batch_size)
 test_dataset = test_dataset.shuffle(len(test_pc)).batch(batch_size)
