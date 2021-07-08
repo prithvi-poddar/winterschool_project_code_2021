@@ -185,7 +185,7 @@ def add_noise_and_shuffle(point_cloud, label):
     # point_cloud = tf.random.shuffle(point_cloud)
     return point_cloud, label
 
-def Confusion_Matrix(prediction, labels):
+def Confusion_Matrix(prediction, labels, class_ids):
     """
     Plot the confusion matrix for classfication
     :param prediction: predicted labels
