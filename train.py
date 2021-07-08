@@ -88,3 +88,36 @@ num_epochs = 500      # <- change this value as needed
 model.fit(train_dataset, epochs=num_epochs, validation_data=test_dataset, callbacks=[tensorboard_callback, early_stopping, model_checkpoint])
 
 model.save('classifier_model_3')
+
+# predict
+#Load the model
+model = tf.keras.models.load_model('./classifier_model', custom_objects={'CustomRegularizer': network.CustomRegularizer})
+#model.summary()
+
+#Predict on test datasets
+prediction=model.predict(test_pc)
+
+#Calculate Accuracy
+m = tf.keras.metrics.CategoricalAccuracy()
+m.update_state(test_labels, prediction)
+Accuracy = m.result().numpy
+
+#Load the normalized test point cloud if necessary
+test_pc = pickle.load(open("./dataset/testpc_normalized.pkl", "rb"))
+test_labels = pickle.load(open("./dataset/testlabels.pkl", "rb"))
+class_ids = pickle.load(open("./dataset/class_ids.pkl", "rb"))
+
+#one-hot --> int
+predict_id = np.argmax(prediction, axis=1)
+true_id = np.argmax(test_labels, axis=1)
+
+# 3. Display some clouds using matplotlib scatter plot along with true and predicted labels
+test_num = len(test_labels)
+idx = np.random.randint(test_num)
+point_cloud = test_pc[idx,:,:]
+p=predict_id[idx]
+t=true_id[idx]
+utils.visualize_cloud(point_cloud, true_label=class_ids[t], predicted_label=class_ids[p])
+
+# 4. Display a confusion matrix
+confusion_matrix=utils.Confusion_Matrix(prediction, test_labels, class_ids)
