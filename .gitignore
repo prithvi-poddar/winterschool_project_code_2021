@@ -144,7 +144,6 @@ train_seg2.pkl
 train_seg2_labels.pkl
 train_seg4.pkl
 train_seg4_labels.pkl
-train_segmentation.py
 sample.ipynb
 sample.py
 
