@@ -10,6 +10,19 @@ from trimesh.triangles import bounds_tree
 import tensorflow as tf
 import pickle
 
+colors =        {'1':	[0,255,0],
+                 '2':	[0,0,255],
+                 '3':	[0,255,255],
+                 '4':   [255,255,0],
+                 '5':   [255,0,255],
+                 '6':   [100,100,255],
+                 '7':   [200,200,100],
+                 '8':   [170,120,200],
+                 '9':   [255,0,0],
+                 '10':  [200,100,100],
+                 '11':  [10,200,100],
+                 '12':  [200,200,200],
+                 '13':  [50,50,50]}  
 
 def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
     """
@@ -72,6 +85,40 @@ def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
     return (np.array(train_pc), np.array(test_pc),
             np.array(encoded_train_labels), np.array(encoded_test_labels), class_ids)
 
+def semantic_data_mod(pc, labels, num_data, num_objects):
+    pc_seg, labels_seg = [], []
+    for data in range(num_data): 
+        index = np.random.randint(0, len(pc), num_objects)
+        scene = pc[index[0]]
+        color_data = np.reshape(np.tile(colors['13'], len(scene)), (-1,3))
+        scene = np.concatenate((scene, color_data), axis=1)
+        label = np.reshape(np.tile(labels[index[0]], len(scene)), (-1,10))
+        for i in index[1:]:
+            axs = np.random.randint(0, 2)
+            origin = 0
+            if axs == 0:
+                dim_scene = np.abs(max(scene[:,0])) + np.abs(min(scene[:,0]))
+                dim_new = np.abs(max(pc[i,:,0])) + np.abs(min(pc[i,:,0]))
+                origin =  max(dim_scene, dim_new)
+            elif axs == 1:
+                dim_scene = np.abs(max(scene[:,1])) + np.abs(min(scene[:,1]))
+                dim_new = np.abs(max(pc[i,:,1])) + np.abs(min(pc[i,:,1]))
+                origin =  max(dim_scene, dim_new)
+            elif axs == 2:
+                dim_scene = np.abs(max(scene[:,2])) + np.abs(min(scene[:,2]))
+                dim_new = np.abs(max(pc[i,:,2])) + np.abs(min(pc[i,:,2]))
+                origin =  max(dim_scene, dim_new)
+
+            scene[:,axs] +=  ((-1)**(np.random.randint(0, 1)))*origin
+
+            label_i = np.reshape(np.tile(labels[i], len(pc[i])), (-1,10))
+            label = np.concatenate((label, label_i), axis=0)
+            color_data = np.reshape(np.tile(colors[str(np.random.randint(1,12))], len(pc[i])), (-1,3))
+            colored_object = np.concatenate((pc[i], color_data), axis=1)
+            scene = np.concatenate((scene, colored_object), axis=0)
+        pc_seg.append(scene)
+        labels_seg.append(label)
+    return pc_seg, labels_seg
 
 def semantic_seg_dataset(data_dir, num_objects, num_test_data, num_train_data, num_points_per_cloud=1024):
     """
@@ -81,67 +128,8 @@ def semantic_seg_dataset(data_dir, num_objects, num_test_data, num_train_data, n
     num_test_data: number of testing objects you want to create
     """
     train_pc, test_pc, train_labels, test_labels, class_ids = create_point_cloud_dataset(data_dir, num_points_per_cloud)
-    train_pc_seg = []
-    test_pc_seg = []
-    train_seg_labels = []
-    test_seg_labels = []
-
-    for data in range(num_train_data): 
-        index = np.random.randint(0, len(train_pc), num_objects)   
-        scene = train_pc[index[0]]
-        label = np.reshape(np.tile(train_labels[index[0]], len(scene)), (-1,10))
-        for i in index[1:]:
-            axs = np.random.randint(0, 2)
-            origin = 0
-            if axs == 0:
-                dim_scene = np.abs(max(scene[:,0])) + np.abs(min(scene[:,0]))
-                dim_new = np.abs(max(train_pc[i,:,0])) + np.abs(min(train_pc[i,:,0]))
-                origin =  max(dim_scene, dim_new)
-            elif axs == 1:
-                dim_scene = np.abs(max(scene[:,1])) + np.abs(min(scene[:,1]))
-                dim_new = np.abs(max(train_pc[i,:,1]))- np.abs(min(train_pc[i,:,1]))
-                origin =  max(dim_scene, dim_new)
-            elif axs == 2:
-                dim_scene = np.abs(max(scene[:,2])) + np.abs(min(scene[:,2]))
-                dim_new = np.abs(max(train_pc[i,:,2]))- np.abs(min(train_pc[i,:,2]))
-                origin =  max(dim_scene, dim_new)
-
-            scene[:,axs%3] +=  ((-1)**(np.random.randint(0, 1)))*origin
-
-            label_i = np.reshape(np.tile(train_labels[i], len(train_pc[i])), (-1,10))
-            label = np.concatenate((label, label_i), axis=0)
-            scene = np.concatenate((scene, train_pc[i]), axis=0)
-
-        train_pc_seg.append(scene)
-        train_seg_labels.append(label)
-
-    for data in range(num_test_data): 
-        index = np.random.randint(0, len(test_pc), num_objects)   
-        scene = test_pc[index[0]]
-        label = np.reshape(np.tile(test_labels[index[0]], len(scene)), (-1,10))
-        for i in index[1:]:
-            axs = np.random.randint(0, 2)
-            origin = 0
-            if axs == 0:
-                dim_scene = np.abs(max(scene[:,0])) + np.abs(min(scene[:,0]))
-                dim_new = np.abs(max(test_pc[i,:,0])) + np.abs(min(test_pc[i,:,0]))
-                origin =  max(dim_scene, dim_new)
-            elif axs == 1:
-                dim_scene = np.abs(max(scene[:,1])) + np.abs(min(scene[:,1]))
-                dim_new = np.abs(max(test_pc[i,:,1])) + np.abs(min(test_pc[i,:,1]))
-                origin =  max(dim_scene, dim_new)
-            elif axs == 2:
-                dim_scene = np.abs(max(scene[:,2])) + np.abs(min(scene[:,2]))
-                dim_new = np.abs(max(test_pc[i,:,2])) + np.abs(min(test_pc[i,:,2]))
-                origin =  max(dim_scene, dim_new)
-            scene[:,axs%3] +=  ((-1)**(np.random.randint(0, 1)))*origin
-
-            label_i = np.reshape(np.tile(test_labels[i], len(test_pc[i])), (-1,10))
-            label = np.concatenate((label, label_i), axis=0)
-            scene = np.concatenate((scene, test_pc[i]), axis=0)
-
-        test_pc_seg.append(scene)
-        test_seg_labels.append(label)
+    train_pc_seg, train_seg_labels = semantic_data_mod(train_pc, train_labels, num_train_data, num_objects)
+    test_pc_seg, test_seg_labels = semantic_data_mod(test_pc, test_labels, num_test_data, num_objects)
 
     return (np.array(train_pc_seg), np.array(test_pc_seg), np.array(train_seg_labels), np.array(test_seg_labels))
 
