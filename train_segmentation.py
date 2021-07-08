@@ -27,12 +27,12 @@ DATA_DIR = "ModelNet10/"     # <- Set this path correctly
 
 ######################## Generating the data ##############################
 
-# train_pc, test_pc, train_labels, test_labels = utils.semantic_seg_dataset('ModelNet10/', 4, 500, 2000, 512)
+# train_pc, test_pc, train_labels, test_labels = utils.semantic_seg_dataset('ModelNet10/', 4, 500, 2000, 256)
 # pickle.dump(train_pc, open("train_seg4.pkl", "wb"))
 # pickle.dump(test_pc, open("test_seg4.pkl", "wb"))
 # pickle.dump(train_labels, open("train_seg4_labels.pkl", "wb"))
 # pickle.dump(test_labels, open("test_seg4_labels.pkl", "wb"))
-# train_pc, test_pc, train_labels, test_labels = utils.semantic_seg_dataset('ModelNet10/', 2, 500, 2000, 1024)
+# train_pc, test_pc, train_labels, test_labels = utils.semantic_seg_dataset('ModelNet10/', 2, 500, 2000, 512)
 # pickle.dump(train_pc, open("train_seg2.pkl", "wb"))
 # pickle.dump(test_pc, open("test_seg2.pkl", "wb"))
 # pickle.dump(train_labels, open("train_seg2_labels.pkl", "wb"))
