@@ -11,8 +11,8 @@ import pickle
 import tensorboard
 from datetime import datetime
 
-import network
-# import reduced_network
+# import network
+import reduced_network as network
 import utils
 import provider
 
@@ -69,11 +69,11 @@ outputs = network.pointnet_classifier(inputs, num_classes=10)
 model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
 model.summary()
 
-logdir = "logs/classifier_2/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+logdir = "logs/classifier_3/" + datetime.now().strftime("%Y%m%d-%H%M%S")
 tensorboard_callback = keras.callbacks.TensorBoard(log_dir=logdir)
 
-es = EarlyStopping(monitor='val_loss', mode='min', patience=100)
-mc = ModelCheckpoint('classifier_model_2_best.h5', monitor='val_accuracy', mode='max', save_best_only=True)
+early_stopping = EarlyStopping(monitor='val_loss', mode='min', patience=100)
+model_checkpoint = ModelCheckpoint('classifier_model_3_best.h5', monitor='val_accuracy', mode='max', save_best_only=True)
 
 
 # 2. Set the loss function, optimizer and metrics to print
@@ -85,6 +85,6 @@ model.compile(
 
 # train the network
 num_epochs = 500      # <- change this value as needed
-model.fit(train_dataset, epochs=num_epochs, validation_data=test_dataset, callbacks=[tensorboard_callback, es, mc])
+model.fit(train_dataset, epochs=num_epochs, validation_data=test_dataset, callbacks=[tensorboard_callback, early_stopping, model_checkpoint])
 
-model.save('classifier_model_2')
+model.save('classifier_model_3')
