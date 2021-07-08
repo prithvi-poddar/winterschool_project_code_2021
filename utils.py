@@ -96,18 +96,10 @@ def semantic_data_mod(pc, labels, num_data, num_objects):
         for i in index[1:]:
             axs = np.random.randint(0, 3)
             origin = 0
-            if axs == 0:
-                dim_scene = np.abs(max(scene[:,0])) + np.abs(min(scene[:,0]))
-                dim_new = np.abs(max(pc[i,:,0])) + np.abs(min(pc[i,:,0]))
-                origin =  max(dim_scene, dim_new)
-            elif axs == 1:
-                dim_scene = np.abs(max(scene[:,1])) + np.abs(min(scene[:,1]))
-                dim_new = np.abs(max(pc[i,:,1])) + np.abs(min(pc[i,:,1]))
-                origin =  max(dim_scene, dim_new)
-            elif axs == 2:
-                dim_scene = np.abs(max(scene[:,2])) + np.abs(min(scene[:,2]))
-                dim_new = np.abs(max(pc[i,:,2])) + np.abs(min(pc[i,:,2]))
-                origin =  max(dim_scene, dim_new)
+
+            dim_scene = np.abs(max(scene[:,axs])) + np.abs(min(scene[:,axs]))
+            dim_new = np.abs(max(pc[i,:,axs])) + np.abs(min(pc[i,:,axs]))
+            origin =  max(dim_scene, dim_new)
 
             scene[:,axs] +=  ((-1)**(np.random.randint(0, 2)))*origin
 
