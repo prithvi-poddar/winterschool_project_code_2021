@@ -11,8 +11,8 @@ import pickle
 import tensorboard
 from datetime import datetime
 
-# import network
-import reduced_network as network
+import network
+# import reduced_network as network
 import utils
 import provider
 
@@ -27,54 +27,54 @@ DATA_DIR = "ModelNet10/"     # <- Set this path correctly
 
 ######################## Generating the data ##############################
 
-# train_pc, test_pc, train_labels, test_labels = utils.semantic_seg_dataset('ModelNet10/', 4, 500, 2500, 512)
-# pickle.dump(train_pc, open("train_seg4.pkl", "wb"))
-# pickle.dump(test_pc, open("test_seg4.pkl", "wb"))
-# pickle.dump(train_labels, open("train_seg4_labels.pkl", "wb"))
-# pickle.dump(test_labels, open("test_seg4_labels.pkl", "wb"))
-# train_pc, test_pc, train_labels, test_labels = utils.semantic_seg_dataset('ModelNet10/', 2, 500, 2500, 1024)
-# pickle.dump(train_pc, open("train_seg2.pkl", "wb"))
-# pickle.dump(test_pc, open("test_seg2.pkl", "wb"))
-# pickle.dump(train_labels, open("train_seg2_labels.pkl", "wb"))
-# pickle.dump(test_labels, open("test_seg2_labels.pkl", "wb"))
+train_pc, test_pc, train_labels, test_labels = utils.semantic_seg_dataset('ModelNet10/', 3, 500, 3000, 800)
+pickle.dump(train_pc, open("train_seg4.pkl", "wb"))
+pickle.dump(test_pc, open("test_seg4.pkl", "wb"))
+pickle.dump(train_labels, open("train_seg4_labels.pkl", "wb"))
+pickle.dump(test_labels, open("test_seg4_labels.pkl", "wb"))
+train_pc, test_pc, train_labels, test_labels = utils.semantic_seg_dataset('ModelNet10/', 2, 500, 3000, 1200)
+pickle.dump(train_pc, open("train_seg2.pkl", "wb"))
+pickle.dump(test_pc, open("test_seg2.pkl", "wb"))
+pickle.dump(train_labels, open("train_seg2_labels.pkl", "wb"))
+pickle.dump(test_labels, open("test_seg2_labels.pkl", "wb"))
 
-# train_pc4 = pickle.load(open("train_seg4.pkl", "rb"))
-# train_labels4 = pickle.load(open("train_seg4_labels.pkl", "rb"))
-# test_pc4 = pickle.load(open("test_seg4.pkl", "rb"))
-# test_labels4 = pickle.load(open("test_seg4_labels.pkl", "rb"))
+train_pc4 = pickle.load(open("train_seg4.pkl", "rb"))
+train_labels4 = pickle.load(open("train_seg4_labels.pkl", "rb"))
+test_pc4 = pickle.load(open("test_seg4.pkl", "rb"))
+test_labels4 = pickle.load(open("test_seg4_labels.pkl", "rb"))
 
-# train_pc2 = pickle.load(open("train_seg2.pkl", "rb"))
-# train_labels2 = pickle.load(open("train_seg2_labels.pkl", "rb"))
-# test_pc2 = pickle.load(open("test_seg2.pkl", "rb"))
-# test_labels2 = pickle.load(open("test_seg2_labels.pkl", "rb"))
-# class_ids = pickle.load(open("class_ids.pkl", "rb"))
+train_pc2 = pickle.load(open("train_seg2.pkl", "rb"))
+train_labels2 = pickle.load(open("train_seg2_labels.pkl", "rb"))
+test_pc2 = pickle.load(open("test_seg2.pkl", "rb"))
+test_labels2 = pickle.load(open("test_seg2_labels.pkl", "rb"))
+class_ids = pickle.load(open("class_ids.pkl", "rb"))
 
-# train_pc = np.concatenate((train_pc4, train_pc2), axis=0)
-# test_pc = np.concatenate((test_pc4, test_pc2), axis=0)
-# train_labels = np.concatenate((train_labels4, train_labels2), axis=0)
-# test_labels = np.concatenate((test_labels4, test_labels2), axis=0)
+train_pc = np.concatenate((train_pc4, train_pc2), axis=0)
+test_pc = np.concatenate((test_pc4, test_pc2), axis=0)
+train_labels = np.concatenate((train_labels4, train_labels2), axis=0)
+test_labels = np.concatenate((test_labels4, test_labels2), axis=0)
 
 # # print(train_pc.shape)
-# train_pc = provider.normalize_pc(train_pc)
+# train_pc = provider.normalize_pc_segmentation(train_pc)
 # # print(train_pc.shape)
-# test_pc = provider.normalize_pc(test_pc)
+# test_pc = provider.normalize_pc_segmentation(test_pc)
 
-# pickle.dump(train_pc, open("trainpc_seg.pkl", "wb"))
-# pickle.dump(test_pc, open("testpc_seg.pkl", "wb"))
-# pickle.dump(train_labels, open("trainlabels_seg.pkl", "wb"))
-# pickle.dump(test_labels, open("testlabels_seg.pkl", "wb"))
+pickle.dump(train_pc, open("trainpc_seg.pkl", "wb"))
+pickle.dump(test_pc, open("testpc_seg.pkl", "wb"))
+pickle.dump(train_labels, open("trainlabels_seg.pkl", "wb"))
+pickle.dump(test_labels, open("testlabels_seg.pkl", "wb"))
 
 ######################## Generating the data ##############################
 
 
 #load data
-train_pc = pickle.load(open("trainpc_seg.pkl", "rb"))
-train_labels = pickle.load(open("trainlabels_seg.pkl", "rb"))
-test_pc = pickle.load(open("testpc_seg.pkl", "rb"))
-test_labels = pickle.load(open("testlabels_seg.pkl", "rb"))
-class_ids = pickle.load(open("class_ids.pkl", "rb"))
+# train_pc = pickle.load(open("trainpc_seg.pkl", "rb"))
+# train_labels = pickle.load(open("trainlabels_seg.pkl", "rb"))
+# test_pc = pickle.load(open("testpc_seg.pkl", "rb"))
+# test_labels = pickle.load(open("testlabels_seg.pkl", "rb"))
+# class_ids = pickle.load(open("class_ids.pkl", "rb"))
 
-print(train_pc.shape)
+
 
 # train_pc = provider.rotate_point_cloud(train_pc)
 # test_pc = provider.rotate_point_cloud(test_pc)
@@ -101,7 +101,7 @@ logdir = "logs/segmentation/" + datetime.now().strftime("%Y%m%d-%H%M%S")
 tensorboard_callback = keras.callbacks.TensorBoard(log_dir=logdir)
 
 early_stopping = EarlyStopping(monitor='val_loss', mode='min', patience=100)
-model_checkpoint = ModelCheckpoint('segmentation_model_best_1.h5', monitor='val_loss', mode='max', save_best_only=True)
+model_checkpoint = ModelCheckpoint('segmentation_model_best_new_norm.h5', monitor='val_loss', mode='max', save_best_only=True)
 
 
 # 2. Set the loss function, optimizer and metrics to print
@@ -110,13 +110,14 @@ model.compile(
     optimizer=keras.optimizers.Adam(learning_rate=0.00001, beta_1=0.9, beta_2=0.999),      # <- you may modify this if you like
     metrics=["accuracy"],    # <- choose a suitable metric, https://www.tensorflow.org/api_docs/python/tf/keras/metrics
 )#metrics = tf.keras.metrics.MeanIoU(num_classes=10)
+
 # model = tf.keras.models.load_model('segmentation_model_best.h5', custom_objects={'CustomRegularizer': network.CustomRegularizer})
 
 # train the network
 num_epochs = 500      # <- change this value as needed
 model.fit(train_dataset, epochs=num_epochs, validation_data=test_dataset, callbacks=[tensorboard_callback, early_stopping, model_checkpoint])
 
-model.save('segmentation_model_1')
+model.save('segmentation_model_new_norm')
 
 # # predict
 # #Load the model

@@ -109,3 +109,22 @@ def normalize_pc(points):
 
     normalised.append(np.array(normalised_points))
   return np.array(normalised)
+
+
+def normalize_pc_segmentation(points):
+  normalised = []
+  for point in points:
+    avg_x = get_avg(point, 0)
+    avg_y = get_avg(point, 1)
+    avg_z = get_avg(point, 2)
+
+    normalised_points = []
+
+    for p in point:
+      x_norm = p[0]-avg_x
+      y_norm = p[1]-avg_y
+      z_norm = p[2]-avg_z
+      normalised_points.append([x_norm, y_norm, z_norm])
+
+    normalised.append(np.array(normalised_points))
+  return np.array(normalised)
