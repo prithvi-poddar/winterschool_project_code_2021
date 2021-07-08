@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from trimesh.triangles import bounds_tree
 import tensorflow as tf
+import pickle
 
 
 def create_point_cloud_dataset(data_dir, num_points_per_cloud=1024):
@@ -81,61 +82,67 @@ def semantic_seg_dataset(data_dir, num_objects, num_test_data, num_train_data, n
     train_pc, test_pc, train_labels, test_labels, class_ids = create_point_cloud_dataset(data_dir, num_points_per_cloud)
     train_pc_seg = []
     test_pc_seg = []
-
-    for data in range(num_test_data): 
-        index = np.random.randint(0, len(test_pc), num_objects)   
-        new = test_pc[index[0]]
-        label = np.reshape(np.tile(test_labels[index[0]], len(new)), (-1,10))
-        # each point gets a column indicating which class it belongs to
-        new = np.concatenate((new, label), axis=1)
-        for i in index[1:]:
-            axs = np.random.randint(0,4)
-            origin = 0
-            if axs == 0:
-                origin = max(test_pc[i,:,0])
-            elif axs == 1:
-                origin = max(test_pc[i,:,1])
-            elif axs == 2:
-                origin = min(test_pc[i,:,0])
-            elif axs == 3:
-                origin = min(test_pc[i,:,1])
-
-            new[:,axs%2] +=  ((-1)**(axs%2))*origin
-
-            label = np.reshape(np.tile(test_labels[i], len(test_pc[i])), (-1,10))
-            test_pclabelled = np.concatenate((test_pc[i], label), axis=1)
-            new = np.concatenate((new, test_pclabelled), axis=0)
-            
-        test_pc_seg.append(new)
+    train_seg_labels = []
+    test_seg_labels = []
 
     for data in range(num_train_data): 
         index = np.random.randint(0, len(train_pc), num_objects)   
-        new = train_pc[index[0]]
-        label = np.reshape(np.tile(train_labels[index[0]], len(new)), (-1,10))
-        # each point gets a column indicating which class it belongs to
-        new = np.concatenate((new, label), axis=1)
+        scene = train_pc[index[0]]
+        label = np.reshape(np.tile(train_labels[index[0]], len(scene)), (-1,10))
         for i in index[1:]:
-            axs = np.random.randint(0,4)
+            axs = np.random.randint(0, 2)
             origin = 0
             if axs == 0:
-                origin = max(train_pc[i,:,0])
+                dim_scene = np.abs(max(scene[:,0])) + np.abs(min(scene[:,0]))
+                dim_new = np.abs(max(train_pc[i,:,0])) + np.abs(min(train_pc[i,:,0]))
+                origin =  max(dim_scene, dim_new)
             elif axs == 1:
-                origin = max(train_pc[i,:,1])
+                dim_scene = np.abs(max(scene[:,1])) + np.abs(min(scene[:,1]))
+                dim_new = np.abs(max(train_pc[i,:,1]))- np.abs(min(train_pc[i,:,1]))
+                origin =  max(dim_scene, dim_new)
             elif axs == 2:
-                origin = min(train_pc[i,:,0])
-            elif axs == 3:
-                origin = min(train_pc[i,:,1])
+                dim_scene = np.abs(max(scene[:,2])) + np.abs(min(scene[:,2]))
+                dim_new = np.abs(max(train_pc[i,:,2]))- np.abs(min(train_pc[i,:,2]))
+                origin =  max(dim_scene, dim_new)
 
-            new[:,axs%2] +=  ((-1)**(axs%2))*origin
+            scene[:,axs%3] +=  ((-1)**(np.random.randint(0, 1)))*origin
 
-            label = np.reshape(np.tile(train_labels[i], len(train_pc[i])), (-1,10))
-            train_pclabelled = np.concatenate((train_pc[i], label), axis=1)
-            new = np.concatenate((new, train_pclabelled), axis=0)
+            label_i = np.reshape(np.tile(train_labels[i], len(train_pc[i])), (-1,10))
+            label = np.concatenate((label, label_i), axis=0)
+            scene = np.concatenate((scene, train_pc[i]), axis=0)
+
+        train_pc_seg.append(scene)
+        train_seg_labels.append(label)
+
+    for data in range(num_test_data): 
+        index = np.random.randint(0, len(test_pc), num_objects)   
+        scene = test_pc[index[0]]
+        label = np.reshape(np.tile(test_labels[index[0]], len(scene)), (-1,10))
+        for i in index[1:]:
+            axs = np.random.randint(0, 2)
+            origin = 0
+            if axs == 0:
+                dim_scene = np.abs(max(scene[:,0])) + np.abs(min(scene[:,0]))
+                dim_new = np.abs(max(test_pc[i,:,0])) + np.abs(min(test_pc[i,:,0]))
+                origin =  max(dim_scene, dim_new)
+            elif axs == 1:
+                dim_scene = np.abs(max(scene[:,1])) + np.abs(min(scene[:,1]))
+                dim_new = np.abs(max(test_pc[i,:,1])) + np.abs(min(test_pc[i,:,1]))
+                origin =  max(dim_scene, dim_new)
+            elif axs == 2:
+                dim_scene = np.abs(max(scene[:,2])) + np.abs(min(scene[:,2]))
+                dim_new = np.abs(max(test_pc[i,:,2])) + np.abs(min(test_pc[i,:,2]))
+                origin =  max(dim_scene, dim_new)
+            scene[:,axs%3] +=  ((-1)**(np.random.randint(0, 1)))*origin
+
+            label_i = np.reshape(np.tile(test_labels[i], len(test_pc[i])), (-1,10))
+            label = np.concatenate((label, label_i), axis=0)
+            scene = np.concatenate((scene, test_pc[i]), axis=0)
             
-        train_pc_seg.append(new)
+        test_pc_seg.append(scene)
+        test_seg_labels.append(label)
 
-    # pc_seg structure is scene x points x (x,y,z, hot encoded class)
-    return (np.array(train_pc_seg[:,:,:3]), np.array(test_pc_seg[:,:,:3]), np.array(train_pc_seg[:,:,-9:]), np.array(test_pc_seg[:,:,-9:]))
+    return (np.array(train_pc_seg), np.array(test_pc_seg), np.array(train_seg_labels), np.array(test_seg_labels))
 
 def visualize_cloud(point_cloud):
     """
@@ -165,3 +172,16 @@ def add_noise_and_shuffle(point_cloud, label):
     # shuffle points
     # point_cloud = tf.random.shuffle(point_cloud)
     return point_cloud, label
+
+if __name__=='__main__':
+    train_pc, test_pc, train_labels, test_labels = semantic_seg_dataset('ModelNet10/', 4, 1000, 4000, 1024)
+    pickle.dump(train_pc, open("train_seg4.pkl", "wb"))
+    pickle.dump(test_pc, open("test_seg4.pkl", "wb"))
+    pickle.dump(train_labels, open("train_seg4_labels.pkl", "wb"))
+    pickle.dump(test_labels, open("test_seg4_labels.pkl", "wb"))
+    train_pc, test_pc, train_labels, test_labels = semantic_seg_dataset('ModelNet10/', 2, 1000, 4000, 2048)
+    pickle.dump(train_pc, open("train_seg2.pkl", "wb"))
+    pickle.dump(test_pc, open("test_seg2.pkl", "wb"))
+    pickle.dump(train_labels, open("train_seg2_labels.pkl", "wb"))
+    pickle.dump(test_labels, open("test_seg2_labels.pkl", "wb"))
+    
