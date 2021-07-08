@@ -185,23 +185,21 @@ def add_noise_and_shuffle(point_cloud, label):
     # point_cloud = tf.random.shuffle(point_cloud)
     return point_cloud, label
 
-def Confusion_Matrix(prediction, labels):
+def Confusion_Matrix(predict_id, true_id, class_ids):
     """
     Plot the confusion matrix for classfication
-    :param prediction: predicted labels
-    :type  prediction: tensor
-    :param labels    : True labels
-    :type label      : tensor
+    :param predict_id: predicted labels
+    :type  predict_id: tensor
+    :param true_id    : True labels
+    :type true_id      : tensor
     :param class_ids : id and items
-    :type label      : dictionary
+    :type  class_ids      : dictionary
     :return: the comfusion matrix
     :rtype:  numpy array
     """
     classes=class_ids.values()
     num_classes = len(classes)
     confusion_matrix = np.zeros([num_classes,num_classes])
-    predict_id = np.argmax(prediction, axis=1)
-    true_id = np.argmax(test_labels, axis=1)
 
     for i in range(len(predict_id)):
         p = predict_id[i]
