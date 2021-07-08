@@ -137,16 +137,28 @@ def semantic_seg_dataset(data_dir, num_objects, num_test_data, num_train_data, n
     # pc_seg structure is scene x points x (x,y,z, hot encoded class)
     return (np.array(train_pc_seg[:,:,:3]), np.array(test_pc_seg[:,:,:3]), np.array(train_pc_seg[:,:,-9:]), np.array(test_pc_seg[:,:,-9:]))
 
-def visualize_cloud(point_cloud):
+def visualize_cloud(point_cloud, true_label='', predicted_label=''):
     """
     Utility function to visualize a point cloud
     :param point_cloud: input point cloud
     :type point_cloud: numpy array
     """
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection="3d")
-    ax.scatter(point_cloud[:, 0], point_cloud[:, 1], point_cloud[:, 2])
-    plt.show()
+    if true_label=='':
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+        ax.scatter(point_cloud[:, 0], point_cloud[:, 1], point_cloud[:, 2])
+        plt.show()
+    else:
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+        ax.scatter(point_cloud[:, 0], point_cloud[:, 1], point_cloud[:, 2])
+        ax.set_xlim(-1,1)
+        ax.set_ylim(-1,1)
+        ax.set_zlim(-1,1)
+        ax.text(x=0, y=0, z=1.2,s="true label: "+true_label, fontsize=10)
+        ax.text(x=0, y=0, z=1,s="predicted label: "+predicted_label, fontsize=10)    
+        plt.show()
+    return
 
 
 def add_noise_and_shuffle(point_cloud, label):
@@ -165,3 +177,42 @@ def add_noise_and_shuffle(point_cloud, label):
     # shuffle points
     # point_cloud = tf.random.shuffle(point_cloud)
     return point_cloud, label
+
+def Confusion_Matrix(prediction, labels):
+    """
+    Plot the confusion matrix for classfication
+    :param prediction: predicted labels
+    :type  prediction: tensor
+    :param labels    : True labels
+    :type label      : tensor
+    :param class_ids : id and items
+    :type label      : dictionary
+    :return: the comfusion matrix
+    :rtype:  numpy array
+    """
+    classes=class_ids.values()
+    num_classes = len(classes)
+    confusion_matrix = np.zeros([num_classes,num_classes])
+    predict_id = np.argmax(prediction, axis=1)
+    true_id = np.argmax(test_labels, axis=1)
+
+    for i in range(len(predict_id)):
+        p = predict_id[i]
+        t = true_id[i]
+        confusion_matrix[p,t]+=1
+    
+    for i in range(num_classes):
+        confusion_matrix[i,:]/= np.sum(confusion_matrix[i,:]) 
+    
+    plt.figure()
+    plt.imshow(confusion_matrix,cmap=plt.cm.Oranges)
+    plt.title('Confusion Matrix')
+    plt.colorbar()
+    plt.xlabel('True Labels')
+    plt.ylabel('Predicted Labels')
+    tick_marks = classes
+    plt.tight_layout()
+    plt.xticks(np.arange(num_classes),classes,rotation=-60)
+    plt.yticks(np.arange(num_classes), classes)
+    
+    return confusion_matrix
