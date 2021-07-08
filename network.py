@@ -147,7 +147,7 @@ def pointnet_segmenter(inputs, num_classes=10):
     num_points_per_cloud = inputs.shape[1]
     # build the network using the following layers
     # apply tnet to the input data
-    x = tnet(inputs, 3)
+    x = tnet(inputs, 6)
     # extract features using some Convolutional Layers - with batch normalization and RELU activation
     x = conv_bn(x, 64)
     x = conv_bn(x, 64)

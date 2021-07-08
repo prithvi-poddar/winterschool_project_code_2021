@@ -131,7 +131,7 @@ def semantic_seg_dataset(data_dir, num_objects, num_test_data, num_train_data, n
     train_pc_seg, train_seg_labels = semantic_data_mod(train_pc, train_labels, num_train_data, num_objects)
     test_pc_seg, test_seg_labels = semantic_data_mod(test_pc, test_labels, num_test_data, num_objects)
 
-    return (np.array(train_pc_seg), np.array(test_pc_seg), np.array(train_seg_labels), np.array(test_seg_labels))
+    return (np.array(train_pc_seg), np.array(test_pc_seg), np.array(train_seg_labels), np.array(test_seg_labels), np.array(class_ids))
 
 def visualize_cloud(point_cloud, true_label='', predicted_label=''):
     """

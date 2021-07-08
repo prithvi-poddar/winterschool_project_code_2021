@@ -111,6 +111,36 @@ def normalize_pc(points):
   return np.array(normalised)
 
 
+def normalize_pc_color(points):
+  normalised = []
+  for point in points:
+    avg_x = get_avg(point, 0)
+    avg_y = get_avg(point, 1)
+    avg_z = get_avg(point, 2)
+
+    normalised_points = []
+
+    K = 0
+    for p in point:
+      K_ = np.sqrt((p[0]-avg_x)**2 + (p[1]-avg_y)**2 + (p[2]-avg_z)**2)
+      if K_ > K:
+        K = K_
+
+    for p in point:
+      x_norm = (p[0]-avg_x)/K
+      y_norm = (p[1]-avg_y)/K
+      z_norm = (p[2]-avg_z)/K
+      r = p[3]/255
+      g = p[4]/255
+      b = p[5]/255
+      normalised_points.append([x_norm, y_norm, z_norm, r, g, b])
+
+    normalised.append(np.array(normalised_points))
+  return np.array(normalised)
+
+
+
+
 def normalize_pc_segmentation(points):
   normalised = []
   for point in points:
