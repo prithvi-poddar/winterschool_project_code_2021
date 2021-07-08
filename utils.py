@@ -94,7 +94,7 @@ def semantic_data_mod(pc, labels, num_data, num_objects):
         scene = np.concatenate((scene, color_data), axis=1)
         label = np.reshape(np.tile(labels[index[0]], len(scene)), (-1,10))
         for i in index[1:]:
-            axs = np.random.randint(0, 2)
+            axs = np.random.randint(0, 3)
             origin = 0
             if axs == 0:
                 dim_scene = np.abs(max(scene[:,0])) + np.abs(min(scene[:,0]))
@@ -109,11 +109,11 @@ def semantic_data_mod(pc, labels, num_data, num_objects):
                 dim_new = np.abs(max(pc[i,:,2])) + np.abs(min(pc[i,:,2]))
                 origin =  max(dim_scene, dim_new)
 
-            scene[:,axs] +=  ((-1)**(np.random.randint(0, 1)))*origin
+            scene[:,axs] +=  ((-1)**(np.random.randint(0, 2)))*origin
 
             label_i = np.reshape(np.tile(labels[i], len(pc[i])), (-1,10))
             label = np.concatenate((label, label_i), axis=0)
-            color_data = np.reshape(np.tile(colors[str(np.random.randint(1,12))], len(pc[i])), (-1,3))
+            color_data = np.reshape(np.tile(colors[str(np.random.randint(1,13))], len(pc[i])), (-1,3))
             colored_object = np.concatenate((pc[i], color_data), axis=1)
             scene = np.concatenate((scene, colored_object), axis=0)
         pc_seg.append(scene)
