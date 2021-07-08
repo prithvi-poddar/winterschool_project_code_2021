@@ -120,4 +120,4 @@ t=true_id[idx]
 utils.visualize_cloud(point_cloud, true_label=class_ids[t], predicted_label=class_ids[p])
 
 # 4. Display a confusion matrix
-confusion_matrix=utils.Confusion_Matrix(prediction, test_labels, class_ids)
+confusion_matrix=utils.Confusion_Matrix(predict_id, true_id, class_ids)

@@ -139,33 +139,36 @@ def pointnet_segmenter(inputs, num_classes=10):
     This is the semantic segmentation version of Pointnet
     :param inputs: input point cloud
     :type inputs: tensor
-    :param num_classes: number of classes
-    :type num_classes: int
+    :param labels: labels for each point of the point cloud
+    :type labels: tensor
+    :return: predicted labels for each point of the point cloud
     :rtype: tensor
     """
+    num_points_per_cloud = inputs.shape[1]
     # build the network using the following layers
     # apply tnet to the input data
     x = tnet(inputs, 3)
     # extract features using some Convolutional Layers - with batch normalization and RELU activation
-    x = conv_bn(x, 32)
-    x = conv_bn(x, 32)
-    # apply tnet on the feature vector
-    local_feature = tnet(x, 32)
-    # extract features using some Convolutional Layers - with batch normalization and RELU activation
-    x = conv_bn(local_feature, 32)
     x = conv_bn(x, 64)
-    x = conv_bn(x, 512)
+    x = conv_bn(x, 64)
+    # apply tnet on the feature vector
+    local_feature =  tnet(x, 64)
+    # extract features using some Convolutional Layers - with batch normalization and RELU activation
+    x = conv_bn(local_feature, 64)
+    x = conv_bn(x, 128)
+    x = conv_bn(x, 1024)    
     # apply 1D global max pooling
     global_feature = layers.GlobalMaxPooling1D()(x)
     # Todo: concatenate these features with the earlier features (f)
     # you can also use skip connections if you like
-    global_feature = tf.expand_dims(input=global_feature, axis=1)
-    global_feature = tf.tile(input=global_feature, multiples=[1, 300, 1])
-    f = layers.concatenate([local_feature, global_feature])
+    global_feature = tf.expand_dims(input=global_feature,axis=1)
+    
+    global_feature = tf.tile(input=global_feature, multiples=[1,num_points_per_cloud,1])
+    f = layers.concatenate([local_feature,global_feature])
     # extract features using some Convolutional Layers - with batch normalization and RELU activation
-    x = conv_bn(f, 256)
+    x = conv_bn(f,512)
+    x = conv_bn(x,256)
     x = conv_bn(x, 128)
-    x = conv_bn(x, 64)
     # return the output
     outputs = layers.Dense(num_classes, activation="softmax")(x)
     return outputs
