@@ -22,21 +22,23 @@ DATA_DIR = "ModelNet10/"     # <- Set this path correctly
 
 
 num_points_per_cloud = 4096
-train_pc, test_pc, train_labels, test_labels, class_ids = utils.create_point_cloud_dataset(DATA_DIR, num_points_per_cloud)
+# train_pc, test_pc, train_labels, test_labels, class_ids = utils.create_point_cloud_dataset(DATA_DIR, num_points_per_cloud)
 
 # print(train_pc.shape)
-train_pc = provider.normalize_pc(train_pc)
+# train_pc = provider.normalize_pc(train_pc)
 # print(train_pc.shape)
-test_pc = provider.normalize_pc(test_pc)
+# test_pc = provider.normalize_pc(test_pc)
 
-pickle.dump(train_pc, open("trainpc.pkl", "wb"))
-pickle.dump(test_pc, open("testpc.pkl", "wb"))
-pickle.dump(train_labels, open("trainlabels.pkl", "wb"))
-pickle.dump(test_labels, open("testlabels.pkl", "wb"))
-pickle.dump(class_ids, open("class_ids.pkl", "wb"))
+# pickle.dump(train_pc, open("trainpc.pkl", "wb"))
+# pickle.dump(test_pc, open("testpc.pkl", "wb"))
+# pickle.dump(train_labels, open("trainlabels.pkl", "wb"))
+# pickle.dump(test_labels, open("testlabels.pkl", "wb"))
+# pickle.dump(class_ids, open("class_ids.pkl", "wb"))
+
+# utils.visualize_cloud(train_pc[0])
 
 
-# load the data from pickle files if already present
+# # load the data from pickle files if already present
 train_pc = pickle.load(open("trainpc.pkl", "rb"))
 train_labels = pickle.load(open("trainlabels.pkl", "rb"))
 test_pc = pickle.load(open("testpc.pkl", "rb"))
