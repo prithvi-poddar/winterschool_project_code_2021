@@ -69,11 +69,11 @@ outputs = network.pointnet_classifier(inputs, num_classes=10)
 model = keras.Model(inputs=inputs, outputs=outputs, name="pointnet")
 model.summary()
 
-logdir = "logs/classifier_3/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+logdir = "logs/classifier/" + datetime.now().strftime("%Y%m%d-%H%M%S")
 tensorboard_callback = keras.callbacks.TensorBoard(log_dir=logdir)
 
 early_stopping = EarlyStopping(monitor='val_loss', mode='min', patience=100)
-model_checkpoint = ModelCheckpoint('classifier_model_3_best.h5', monitor='val_accuracy', mode='max', save_best_only=True)
+model_checkpoint = ModelCheckpoint('classifier_model_best.h5', monitor='val_accuracy', mode='max', save_best_only=True)
 
 
 # 2. Set the loss function, optimizer and metrics to print
@@ -87,7 +87,7 @@ model.compile(
 num_epochs = 500      # <- change this value as needed
 model.fit(train_dataset, epochs=num_epochs, validation_data=test_dataset, callbacks=[tensorboard_callback, early_stopping, model_checkpoint])
 
-model.save('classifier_model_3')
+model.save('classifier_model')
 
 # predict
 #Load the model
@@ -103,9 +103,9 @@ m.update_state(test_labels, prediction)
 Accuracy = m.result().numpy
 
 #Load the normalized test point cloud if necessary
-test_pc = pickle.load(open("./dataset/testpc_normalized.pkl", "rb"))
-test_labels = pickle.load(open("./dataset/testlabels.pkl", "rb"))
-class_ids = pickle.load(open("./dataset/class_ids.pkl", "rb"))
+test_pc = pickle.load(open("testpc.pkl", "rb"))
+test_labels = pickle.load(open("testlabels.pkl", "rb"))
+class_ids = pickle.load(open("class_ids.pkl", "rb"))
 
 #one-hot --> int
 predict_id = np.argmax(prediction, axis=1)

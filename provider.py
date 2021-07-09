@@ -127,9 +127,9 @@ def normalize_pc_color(points):
         K = K_
 
     for p in point:
-      x_norm = (p[0]-avg_x)/K
-      y_norm = (p[1]-avg_y)/K
-      z_norm = (p[2]-avg_z)/K
+      x_norm = (p[0]-avg_x)/(K+1e4)
+      y_norm = (p[1]-avg_y)/(K+1e4)
+      z_norm = (p[2]-avg_z)/(K+1e4)
       r = p[3]/255
       g = p[4]/255
       b = p[5]/255

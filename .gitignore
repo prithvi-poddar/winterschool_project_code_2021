@@ -152,3 +152,4 @@ testpc_seg.pkl
 trainlabels_seg.pkl
 trainpc_seg.pkl
 logs/
+dataset/
