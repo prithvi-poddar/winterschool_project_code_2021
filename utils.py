@@ -181,7 +181,7 @@ def semantic_seg_dataset(data_dir, num_objects, num_test_data, num_train_data, n
         scene = test_pc[index[0]]
         label = np.reshape(np.tile(test_labels[index[0]], len(scene)), (-1,10))
         for i in index[1:]:
-            axs = np.random.randint(0, 2)
+            axs = np.random.randint(0, 3)
             origin = 0
             if axs == 0:
                 dim_scene = np.abs(max(scene[:,0])) + np.abs(min(scene[:,0]))
